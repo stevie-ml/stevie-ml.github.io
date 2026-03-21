@@ -93,17 +93,12 @@
 
     .card {
       display: flex;
-      position: relative;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 0;
       padding: 16px 0;
       border-bottom: 1px solid #e8e4de;
       text-decoration: none;
       color: inherit;
-    }
-
-    .card:has(.card-squiggle) {
-      padding-bottom: 96px;
     }
 
     .card:last-child {
@@ -117,6 +112,8 @@
     .card-img-wrap {
       flex-shrink: 0;
       margin-right: 24px;
+      display: flex;
+      flex-direction: column;
     }
 
     .card-img {
@@ -128,11 +125,11 @@
     }
 
     .card-squiggle {
-      position: absolute;
-      left: 0;
-      bottom: 8px;
       width: 140px;
       height: 80px;
+      margin-top: 6px;
+      display: block;
+      flex-shrink: 0;
     }
 
     .card-body {
@@ -140,7 +137,7 @@
       min-width: 0;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       padding-left: 24px;
     }
 
@@ -256,8 +253,7 @@
     <div class="right-col">
     <div class="writing-section">
       <a class="card" href="https://sportspredictcom.substack.com/p/skill-at-thinking" target="_blank">
-        <div class="card-img-wrap"><img class="card-img" src="https://substack-post-media.s3.amazonaws.com/public/images/217e896d-8bae-46a3-9b34-64f037cb16b2_1356x740.png" alt=""></div>
-        <svg class="card-squiggle" viewBox="0 0 140 60" xmlns="http://www.w3.org/2000/svg"><path d="M0,30 C4,20 8,40 12,30 C16,20 20,40 24,30 C28,20 32,40 36,30 C40,20 44,40 48,30 C52,20 56,40 60,30 C64,20 68,40 72,30 C76,20 80,40 84,30 C88,20 92,40 96,30 C100,20 104,40 108,30 C112,20 116,40 120,30 C124,20 128,40 132,30 C136,20 140,40 140,30" fill="none" stroke="#1a1a1a" stroke-width="1.5"/></svg>
+        <div class="card-img-wrap"><img class="card-img" src="https://substack-post-media.s3.amazonaws.com/public/images/217e896d-8bae-46a3-9b34-64f037cb16b2_1356x740.png" alt=""><svg class="card-squiggle" viewBox="0 0 140 60" xmlns="http://www.w3.org/2000/svg"><path d="M0,30 C4,20 8,40 12,30 C16,20 20,40 24,30 C28,20 32,40 36,30 C40,20 44,40 48,30 C52,20 56,40 60,30 C64,20 68,40 72,30 C76,20 80,40 84,30 C88,20 92,40 96,30 C100,20 104,40 108,30 C112,20 116,40 120,30 C124,20 128,40 132,30 C136,20 140,40 140,30" fill="none" stroke="#1a1a1a" stroke-width="1.5"/></svg></div>
         <div class="card-body">
           <div class="card-pub">SportsPredict</div>
           <div class="card-title">Skill at Thinking: A Review of Tetlock's Superforecasting</div>
@@ -266,8 +262,7 @@
       </a>
 
       <a class="card" href="https://reason.com/2025/06/06/the-dreadful-policies-halting-archeological-discoveries/" target="_blank">
-        <div class="card-img-wrap"><img class="card-img" src="https://reason.com/wp-content/uploads/2025/06/miller-scaled.jpg" alt=""></div>
-        <svg class="card-squiggle" viewBox="0 0 140 60" xmlns="http://www.w3.org/2000/svg"><path d="M0,30 C4,20 8,40 12,30 C16,20 20,40 24,30 C28,20 32,40 36,30 C40,20 44,40 48,30 C52,20 56,40 60,30 C64,20 68,40 72,30 C76,20 80,40 84,30 C88,20 92,40 96,30 C100,20 104,40 108,30 C112,20 116,40 120,30 C124,20 128,40 132,30 C136,20 140,40 140,30" fill="none" stroke="#1a1a1a" stroke-width="1.5"/></svg>
+        <div class="card-img-wrap"><img class="card-img" src="https://reason.com/wp-content/uploads/2025/06/miller-scaled.jpg" alt=""><svg class="card-squiggle" viewBox="0 0 140 60" xmlns="http://www.w3.org/2000/svg"><path d="M0,30 C4,20 8,40 12,30 C16,20 20,40 24,30 C28,20 32,40 36,30 C40,20 44,40 48,30 C52,20 56,40 60,30 C64,20 68,40 72,30 C76,20 80,40 84,30 C88,20 92,40 96,30 C100,20 104,40 108,30 C112,20 116,40 120,30 C124,20 128,40 132,30 C136,20 140,40 140,30" fill="none" stroke="#1a1a1a" stroke-width="1.5"/></svg></div>
         <div class="card-body">
           <div class="card-pub">Reason</div>
           <div class="card-title">The Dreadful Policies Halting Archaeological Discoveries</div>
