@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entropic Writing Workshop — Stevie Miller</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: #f0eef8; font-family: 'EB Garamond', Georgia, serif; }
+    header {
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      border-bottom: 1px solid #d4cfe8;
+      background: #f0eef8;
+    }
+    header a { text-decoration: none; color: #1e1b3a; }
+    header .home { font-size: 1rem; color: #7c5cbf; }
+    header .home:hover { text-decoration: underline; }
+    header h1 { font-size: 1.1rem; font-weight: 400; color: #1e1b3a; }
+    .frame-container {
+      width: 100%;
+      height: calc(100vh - 52px);
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: calc(100vh - 52px);
+      color: #7c7a9e;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="home" href="/">← stevie.art</a>
+    <h1>Entropic Writing Workshop</h1>
+  </header>
+  <div class="frame-container">
+    <iframe
+      src="https://stevie-ml-entropy-poem.streamlit.app/?embedded=true"
+      title="Entropic Writing Workshop"
+      allow="clipboard-write"
+    ></iframe>
+  </div>
+</body>
+</html>
