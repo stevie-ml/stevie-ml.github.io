@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="12" fill="#1e1b3a"/>
-  <text x="32" y="47" font-family="Georgia, serif" font-size="42" font-style="italic" fill="#f0eef8" text-anchor="middle">S</text>
+  <rect width="64" height="64" rx="12" fill="#1a1a1a"/>
+  <text x="32" y="44" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="26" font-weight="600" fill="#ffffff" text-anchor="middle">SM</text>
 </svg>
