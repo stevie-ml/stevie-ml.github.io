@@ -1,0 +1,1791 @@
+<title>Atlas of Eminence</title>
+<style>
+:root{
+  --bg:#f7f6f3; --surface:#fffefc; --surface-2:#f1efe8;
+  --ink:#201d16; --ink-2:#57503f; --ink-3:#8b8474; --line:#ddd8ca; --rule:#b9b2a0;
+  --over:35; --under:212;
+  --sel:#201d16; --sel-soft:#eae6d9; --map-sel:#7b3fa0; --logo-invert:0;
+  --sea:hsl(210 20% 91%);
+  --pos:#8a5a12; --neg:#22456f;
+  --shadow:0 1px 3px rgba(32,29,22,.14);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#151310; --surface:#1c1a15; --surface-2:#232019;
+    --ink:#e9e4d6; --ink-2:#b0a893; --ink-3:#7d7663; --line:#37332a; --rule:#57503f;
+    --sel:#e9e4d6; --sel-soft:#2e2a20; --map-sel:#c79bea; --logo-invert:.92;
+    --sea:hsl(212 18% 9%);
+    --pos:#d9a558; --neg:#7ba7dd;
+    --shadow:0 1px 3px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151310; --surface:#1c1a15; --surface-2:#232019;
+  --ink:#e9e4d6; --ink-2:#b0a893; --ink-3:#7d7663; --line:#37332a; --rule:#57503f;
+  --sel:#e9e4d6; --sel-soft:#2e2a20; --map-sel:#c79bea; --logo-invert:.92;
+  --sea:hsl(212 18% 9%);
+  --pos:#d9a558; --neg:#7ba7dd;
+  --shadow:0 1px 3px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:13.5px/1.55 var(--serif);
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.92em}
+h1{margin:0;font-size:21px;font-weight:600;letter-spacing:.14em;font-variant-caps:all-small-caps}
+.lbl{font-size:11.5px;font-weight:600;letter-spacing:.09em;font-variant-caps:all-small-caps;color:var(--ink-3)}
+
+header{
+  padding:14px 26px 12px; background:var(--surface);
+  border-bottom:4px double var(--rule);
+  display:flex; flex-wrap:wrap; gap:10px 28px; align-items:baseline;
+}
+header .tagline{margin:0;color:var(--ink-2);font-size:13px;font-style:italic;max-width:56ch}
+.logo{height:52px;width:auto;align-self:center;filter:invert(var(--logo-invert))}
+.psearch{position:relative;order:8}
+.psearch input{width:210px;padding:5px 10px;border:1px solid var(--rule);border-radius:0;
+  background:var(--surface);color:var(--ink);font-family:var(--serif);font-size:13px;font-style:italic}
+.psearch input:focus{outline:2px solid var(--ink);outline-offset:1px}
+#psearch-menu{position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--surface);
+  border:1px solid var(--rule);border-top:0;box-shadow:var(--shadow);max-height:340px;overflow-y:auto;display:none}
+#psearch-menu.on{display:block}
+.pres{padding:6px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:12.5px}
+.pres:hover,.pres.hi{background:var(--sel-soft)}
+.pres b{font-weight:600}
+.pres .sub{color:var(--ink-3);font-style:italic;font-size:11.5px}
+.fig.flash{animation:figflash 1.6s ease}
+@keyframes figflash{0%,40%{background:var(--sel-soft)}100%{background:transparent}}
+.fig{cursor:pointer}
+.fig:hover{background:var(--surface-2)}
+/* look-under-the-hood mentions drawer */
+#mback{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:80;opacity:0;pointer-events:none;transition:opacity .18s}
+#mback.on{opacity:1;pointer-events:auto}
+#mpanel{position:fixed;top:0;right:0;height:100%;width:min(600px,94vw);z-index:81;background:var(--surface);
+  border-left:1px solid var(--rule);box-shadow:-2px 0 18px rgba(0,0,0,.18);transform:translateX(100%);
+  transition:transform .22s ease;display:flex;flex-direction:column}
+#mpanel.on{transform:translateX(0)}
+#mphead{padding:16px 18px 12px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:10px}
+#mptitle{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);line-height:1.2}
+#mpsub{font-size:12px;color:var(--ink-3);margin-top:3px}
+#mpclose{margin-left:auto;background:none;border:1px solid var(--line);color:var(--ink-2);
+  width:28px;height:28px;border-radius:0;cursor:pointer;font-size:15px;flex:none}
+#mpclose:hover{border-color:var(--rule);color:var(--ink)}
+#mpbody{overflow-y:auto;padding:8px 0 40px;flex:1}
+.mpfld{padding:12px 18px 4px}
+.mpfld h4{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-2);margin:0 0 8px;display:flex;align-items:baseline;gap:8px}
+.mpfld h4 .n{color:var(--ink-3);font-size:10.5px}
+.mpq{border-left:2px solid var(--line);padding:2px 0 8px 12px;margin:0 0 10px;font-family:var(--serif);
+  font-size:13px;line-height:1.5;color:var(--ink)}
+.mpq .src{display:block;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:4px;letter-spacing:.02em}
+#mpbody .muted{padding:22px 18px;color:var(--ink-3);font-size:13px}
+.combo{position:relative}
+input#f-field{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:0;
+  background:var(--surface);color:var(--ink);font-family:var(--serif);font-size:12.5px}
+input#f-field:focus{outline:2px solid var(--ink);outline-offset:1px}
+.combomenu{position:fixed;z-index:50;background:var(--surface);
+  border:1px solid var(--rule);max-height:min(60vh,420px);overflow-y:auto;box-shadow:var(--shadow);display:none}
+.combomenu.on{display:block}
+.combomenu .grp{padding:6px 10px 2px;font-variant-caps:all-small-caps;letter-spacing:.08em;color:var(--ink-3);font-size:11px}
+.combomenu .grp:first-child{padding-top:4px}
+.combomenu .opt{padding:5px 12px;cursor:pointer;font-size:12.5px}
+.combomenu .opt.cur{font-weight:600}
+.combomenu .opt:hover,.combomenu .opt.hi{background:var(--sel-soft)}
+.apibtn{
+  order:9;padding:4px 12px;border:1px solid var(--rule);border-radius:0;
+  background:transparent;color:var(--ink-2);font-family:var(--serif);font-size:11.5px;font-weight:600;
+  letter-spacing:.09em;font-variant-caps:all-small-caps;cursor:pointer;align-self:center;
+}
+.apibtn:hover{color:var(--ink);border-color:var(--ink)}
+.apibtn[aria-expanded="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.docs{display:none;padding:20px 26px 26px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.docs.on{display:block}
+.docs h2{margin:0 0 4px;font-size:15px;font-weight:600;font-variant-caps:all-small-caps;letter-spacing:.06em}
+.docs p{margin:0 0 12px;color:var(--ink-2);font-size:12.5px;max-width:78ch}
+.docs pre{
+  margin:0 0 12px;padding:11px 13px;border:1px solid var(--line);
+  background:var(--surface);overflow-x:auto;font-size:11.5px;line-height:1.65;font-family:var(--mono);
+}
+.docs code{font-family:var(--mono);font-size:11.5px;background:var(--surface);border:1px solid var(--line);padding:0 4px}
+.docs .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+header p{margin:0}
+.stat{display:flex;gap:6px;align-items:baseline}
+.stat b{font-size:14px;font-weight:600}
+
+.wrap{display:grid;grid-template-columns:212px minmax(0,1fr) 344px;gap:0;align-items:start}
+@media(max-width:1100px){.wrap{grid-template-columns:1fr}}
+
+aside{padding:20px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:19px;
+  position:sticky;top:0;max-height:100vh;overflow-y:auto;scrollbar-width:thin;padding-bottom:28px}
+@media(max-width:1100px){aside{position:static;border-right:0;border-bottom:1px solid var(--line)}}
+aside::-webkit-scrollbar{width:8px}
+aside::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+aside::-webkit-scrollbar-thumb:hover{background:var(--rule)}
+
+.ctl{display:flex;flex-direction:column;gap:7px}
+.ctl>.lbl{border-bottom:1px solid var(--line);padding-bottom:3px}
+select,input[type=range]{width:100%}
+select{max-width:100%;
+  padding:6px 7px;border:1px solid var(--line);border-radius:0;
+  background:var(--surface);color:var(--ink);font-family:var(--serif);font-size:12.5px;
+}
+.seg{display:flex;flex-wrap:wrap;gap:0}
+.range{display:flex;gap:5px;align-items:center;margin-top:2px;font-size:11.5px;color:var(--ink-3)}
+.range input{width:100%;min-width:0;padding:4px 6px;border:1px solid var(--line);border-radius:0;background:var(--surface);color:var(--ink);font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums}
+.range button{padding:4px 9px;border:1px solid var(--line);border-radius:0;background:transparent;color:var(--ink-2);font-family:var(--serif);font-size:11.5px;cursor:pointer}
+.range button:hover{color:var(--ink);border-color:var(--rule)}
+.seg button{
+  flex:1 1 auto;padding:4px 7px;border:1px solid var(--line);margin:0 -1px -1px 0;border-radius:0;
+  background:transparent;color:var(--ink-2);font-family:var(--serif);font-size:12px;cursor:pointer;
+  white-space:nowrap;
+}
+.seg button:hover{color:var(--ink);position:relative;z-index:1;border-color:var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg);position:relative;z-index:2}
+.adv{border:1px solid var(--line);padding:0 10px;background:var(--surface)}
+.adv summary{cursor:pointer;padding:7px 0;font-size:11.5px;font-weight:600;letter-spacing:.09em;
+  font-variant-caps:all-small-caps;color:var(--ink-3);list-style:none}
+.adv summary:hover{color:var(--ink)}
+.adv summary::-webkit-details-marker{display:none}
+.adv summary::before{content:"\25B8\00a0"}
+.adv[open] summary::before{content:"\25BE\00a0"}
+.adv[open]{padding-bottom:12px}
+.adv .ctl{margin-top:10px}
+.adv select[multiple]{height:auto;padding:4px;font-size:11.5px}
+.hint{font-size:11px;color:var(--ink-3);display:flex;justify-content:space-between;align-items:center;gap:6px;font-style:italic}
+.hint button{border:1px solid var(--line);background:transparent;color:var(--ink-2);
+  font-family:var(--serif);font-size:10.5px;padding:1px 6px;cursor:pointer;font-style:normal}
+label.chk{display:flex;gap:7px;align-items:center;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+label.chk input[type=checkbox],input[type=checkbox]{accent-color:var(--ink)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+main{padding:20px 24px;min-width:0}
+.maphead{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.credit2{margin-left:auto;font-size:11px;font-style:italic;color:var(--ink-3)}
+.zoomhint{font-size:10.5px;font-style:italic;color:var(--ink-3);align-self:center}
+.maptitle{margin:0;font-size:23px;font-weight:600;letter-spacing:.09em;font-variant-caps:all-small-caps;color:var(--ink)}
+.mapwrap{position:relative;border:1px solid var(--rule);background:var(--surface);overflow:hidden}
+.mapwrap.eurv{width:fit-content;margin:0 auto;max-width:100%}
+.mapwrap.eurv svg.map{height:min(72vh,680px);width:auto;max-width:100%}
+svg.map{display:block;width:100%;height:auto;max-height:min(70vh,660px)}
+svg.map path{stroke:var(--surface);stroke-width:.9;stroke-linejoin:round;cursor:pointer;transition:opacity .1s ease;vector-effect:non-scaling-stroke}
+svg.map circle{vector-effect:non-scaling-stroke}
+svg.map path.nodata{fill:var(--surface-2);cursor:default}
+svg.map path.zerofill{cursor:pointer}
+svg.map path.zerofill:hover{opacity:.75}
+svg.map path:not(.nodata):hover{opacity:.82}
+svg.map path.sel{stroke:var(--map-sel);stroke-width:4;paint-order:stroke}
+svg.map path.sel.nodata{stroke-dasharray:4 3}
+.inset.car{left:10px;right:auto;bottom:248px;width:216px;display:none}
+.inset{
+  position:absolute;left:10px;bottom:10px;width:216px;
+  border:1px solid var(--rule);background:var(--surface);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.inset svg{display:block;width:100%;height:auto}
+.inset svg path{stroke:var(--surface);stroke-width:.7;stroke-linejoin:round;cursor:pointer}
+.inset svg path.nodata{fill:var(--line);opacity:.45;cursor:default}
+.inset svg path.sel{stroke:var(--map-sel);stroke-width:2.2;paint-order:stroke}
+.inset-lbl{
+  display:block;padding:3px 7px 4px;font-size:10px;font-weight:600;letter-spacing:.08em;
+  font-variant-caps:all-small-caps;color:var(--ink-3);border-top:1px solid var(--line);background:var(--surface);
+}
+@media(max-width:640px){.inset{display:none}}
+.tip{
+  position:absolute;pointer-events:none;z-index:6;padding:6px 10px;
+  background:var(--ink);color:var(--bg);font-size:11.5px;line-height:1.4;white-space:nowrap;
+  font-family:var(--serif);box-shadow:var(--shadow);opacity:0;transition:opacity .09s ease;
+}
+.tip.on{opacity:1}
+.tip b{font-weight:600}
+.peoplesbox{margin-top:12px;border:1px solid var(--line);background:var(--surface);padding:0 10px}
+.peoplesbox summary{cursor:pointer;padding:7px 0;font-size:11.5px;font-weight:600;letter-spacing:.09em;
+  font-variant-caps:all-small-caps;color:var(--ink-3);list-style:none}
+.peoplesbox summary:hover{color:var(--ink)}
+.peoplesbox summary::-webkit-details-marker{display:none}
+.peoplesbox summary::before{content:"\25B8\00a0"}
+.peoplesbox[open] summary::before{content:"\25BE\00a0"}
+.peoplesbox[open]{padding-bottom:10px}
+.grouprow{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch}
+.grouprow:empty{display:none}
+.grouprow .glbl{font-size:11.5px;font-weight:600;letter-spacing:.09em;font-variant-caps:all-small-caps;color:var(--ink-3);margin-right:2px;align-self:center}
+.gtile{
+  display:flex;flex-direction:column;gap:1px;padding:4px 9px;border:1px solid var(--line);
+  cursor:pointer;background:var(--surface-2);min-width:100px;font-family:var(--serif);
+}
+.gtile b{font-size:11.5px;font-weight:600;letter-spacing:.01em}
+.gtile span{font-size:10px;opacity:.85;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.gtile[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px}
+.gtile.empty{opacity:.4;cursor:default}
+.warn{display:none;margin-top:14px;padding:9px 13px;border:1px solid var(--line);border-left:3px solid var(--rule);background:var(--surface-2);color:var(--ink-2);font-size:12.5px;line-height:1.55;font-style:italic}
+.warn.on{display:block}
+.warn b{font-style:normal}
+.scale{display:flex;align-items:center;gap:9px;margin-top:16px;flex-wrap:wrap}
+.ramp{display:flex;height:10px;overflow:hidden;width:230px;border:1px solid var(--rule)}
+.ramp i{flex:1}
+
+.rankhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:30px 0 0;flex-wrap:wrap;border-top:4px double var(--rule);padding-top:12px}
+#f-find{padding:4px 9px;border:1px solid var(--line);border-radius:0;background:var(--surface);color:var(--ink);font-family:var(--serif);font-size:12.5px;min-width:170px;font-style:italic}
+#f-find:focus{outline:2px solid var(--ink);outline-offset:1px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:8px}
+th{
+  text-align:left;font-size:11.5px;letter-spacing:.08em;font-variant-caps:all-small-caps;
+  color:var(--ink-3);font-weight:600;padding:5px 8px;border-bottom:1px solid var(--rule);
+}
+th.n,td.n{text-align:right}
+th[data-k]{cursor:pointer;user-select:none;white-space:nowrap}
+th[data-k]:hover{color:var(--ink)}
+th[data-k].on{color:var(--ink)}
+th[data-k].on::after{content:"\00a0\25BC";font-size:8px;vertical-align:1px}
+th[data-k].on.asc::after{content:"\00a0\25B2"}
+td{padding:4.5px 8px;border-bottom:1px solid var(--line)}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:11.5px}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr[aria-selected="true"]{background:var(--sel-soft);box-shadow:inset 3px 0 0 var(--ink)}
+
+.panel{
+  padding:20px 18px;border-left:1px solid var(--line);background:var(--surface);
+  min-height:100vh;
+}
+@media(max-width:1100px){.panel{border-left:0;border-top:1px solid var(--line);min-height:0}}
+.cellhead{display:flex;flex-direction:column;gap:3px;margin-bottom:14px;border-bottom:4px double var(--rule);padding-bottom:12px}
+.cellhead .who{font-size:19px;font-weight:600;letter-spacing:.01em}
+.cellhead .what{font-size:12.5px;color:var(--ink-2);font-style:italic}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:16px;border:1px solid var(--line)}
+.metric{background:var(--surface);border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 9px}
+.metric:nth-child(3n){border-right:0}
+.metric:nth-child(n+4){border-bottom:0}
+.metric .k{font-size:10.5px;letter-spacing:.08em;font-variant-caps:all-small-caps;color:var(--ink-3);font-weight:600}
+.metric .v{font-size:15px;font-weight:600;margin-top:1px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.verdict{display:inline-block;padding:1px 9px;border:1px solid var(--rule);font-size:11.5px;font-weight:600;margin-top:6px;font-variant-caps:all-small-caps;letter-spacing:.05em}
+
+.ptabs{display:flex;gap:0;margin-bottom:12px}
+.ptabs button{flex:1;padding:5px 8px;border:1px solid var(--line);margin-right:-1px;background:transparent;
+  color:var(--ink-2);font-family:var(--serif);font-size:12px;cursor:pointer}
+.ptabs button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg);z-index:1;position:relative}
+.plegend{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--ink-3);font-style:italic;
+  margin:2px 0 12px;flex-wrap:wrap}
+.plegend .sw{display:inline-block;width:16px;height:8px;border:1px solid var(--line)}
+.plegend .sw.over{background:hsl(var(--over) 62% 52%);margin-left:2px}
+.plegend .sw.under{background:hsl(var(--under) 55% 55%);margin-left:10px}
+.plegend span{margin-left:10px}
+.pvw{display:inline;font-size:9px;letter-spacing:.06em;font-variant-caps:all-small-caps;color:var(--ink-3);margin-left:3px;font-family:var(--serif)}
+.psec{margin-bottom:18px}
+.psec h4{margin:0 0 6px;font-size:11.5px;font-weight:600;letter-spacing:.08em;font-variant-caps:all-small-caps;color:var(--ink-3);border-bottom:1px solid var(--line);padding-bottom:2px}
+.prow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;
+  padding:4.5px 2px;border-bottom:1px solid var(--line);font-size:12.5px}
+.prow .pn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow .pv{font-weight:600;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:11.5px;min-width:44px;text-align:right}
+.prow .pc{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;font-family:var(--mono);min-width:52px;text-align:right}
+.pbar{height:3px;grid-column:1/4;margin-top:2px}
+.figs{display:flex;flex-direction:column;gap:0;max-height:none}
+.fig{
+  display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:2px 8px;
+  padding:7px 2px;border-bottom:1px solid var(--line);align-items:baseline;
+}
+.fig .nm{font-size:14px;font-weight:600;letter-spacing:.005em}
+.fig .rank{grid-column:1;grid-row:1;color:var(--map-sel);font-family:var(--mono);
+  font-size:11px;font-weight:700}
+.fig .nm{grid-column:2;grid-row:1}
+.fig .meta{grid-column:2/4;grid-row:3}
+.fig .meta .polhome{opacity:.5}
+.fig .meta{font-size:11.5px;color:var(--ink-3)}
+.fig .meta:empty{display:none}
+.fig .desc{grid-column:2/4;grid-row:2;font-size:12.5px;color:var(--ink-2);font-style:italic;line-height:1.45;margin-top:1px}
+/* a verbatim quizbowl bonus part: set like a packet (Times), in an inset box so it reads as a quotation, not our prose */
+.fig .desc.qb{font-style:italic;font-family:"Times New Roman",Times,"Liberation Serif",serif;font-size:13px;line-height:1.42;color:var(--ink-2);
+  background:color-mix(in srgb,var(--surface-2) 45%,var(--surface));border:1px solid var(--line);padding:6px 10px;margin:3px 0 2px}
+.alsofld{font-style:normal;color:var(--ink-2)}
+.ofrom{font-style:normal;color:var(--map-sel);font-weight:600;font-size:11.5px}
+.ocol{grid-column:3;grid-row:1;display:flex;flex-direction:column;align-items:flex-end;gap:1px;text-align:right}
+.ocol .ofrom,.ocol .freq{display:block;text-align:right;width:100%}
+.fig .freq{grid-column:3;grid-row:1;font-size:13px;font-weight:600;align-self:baseline;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.fig .freq small{display:block;font-size:9.5px;font-weight:500;color:var(--ink-3);letter-spacing:.05em;font-family:var(--serif)}
+tbody tr.anc td:first-child{box-shadow:inset 3px 0 0 var(--rule)}
+tbody tr.anc td:first-child b{font-style:italic}
+.ancmark{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.07em;font-variant-caps:all-small-caps;
+  padding:0 4px;border:1px solid var(--line);color:var(--ink-3);margin-left:6px;vertical-align:1px;font-style:normal}
+svg.map path.ancgroup{stroke:var(--ink);stroke-width:1.6;stroke-dasharray:5 2.5;paint-order:stroke}
+.thin{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.05em;font-variant-caps:all-small-caps;padding:0 4px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-3);margin-left:5px;vertical-align:1px}
+tbody tr.thinrow td{color:var(--ink-3)}
+tbody tr.zerorow td{color:var(--ink-3);font-style:italic}
+.est{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.05em;font-variant-caps:all-small-caps;padding:0 3px;border:1px solid var(--line);color:var(--ink-3);margin-left:5px;vertical-align:1px}
+.jew{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.06em;font-variant-caps:all-small-caps;padding:0 4px;border:1px solid var(--rule);color:var(--ink-2);margin-left:5px;vertical-align:1px}
+.lcmark{font-size:10px;letter-spacing:.05em;font-variant-caps:all-small-caps;color:var(--ink-3);
+  border:1px solid var(--line);padding:0 4px;cursor:help;font-style:normal}
+.empty-note{color:var(--ink-3);font-size:12.5px;padding:14px 0;font-style:italic}
+footer{padding:14px 26px 34px;border-top:1px solid var(--line);color:var(--ink-3);font-size:12px;margin-top:20px;font-style:italic}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <img class="logo" alt="" src="data:image/png;base64,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">
+  <div>
+    <h1>Atlas of Eminence</h1>
+    <p class="tagline">Who the quizbowl canon remembers, and where they were from.</p>
+  </div>
+  <div class="stat"><span class="lbl">People</span><b class="mono" id="s-people">—</b></div>
+  <div class="stat"><span class="lbl">Questions</span><b class="mono" id="s-q">—</b></div>
+  <div class="stat"><span class="lbl">Countries</span><b class="mono" id="s-c">—</b></div>
+  <div class="psearch">
+    <input id="psearch-in" type="text" placeholder="find a person…" autocomplete="off" spellcheck="false">
+    <div id="psearch-menu"></div>
+  </div>
+  <a class="apibtn" id="playlink" href="/" style="display:none;text-decoration:none">Play &rarr;</a>
+  <button class="apibtn" id="recbtn">Records</button>
+  <button class="apibtn" id="apibtn">API</button>
+</header>
+
+<section class="docs" id="records">
+  <h2>Records — the greatest dominances</h2>
+  <p>Every country &times; field &times; era cell under the current filters, ranked by how much of
+     the field's whole output that country produced in that era. Cells need at least 8 people and
+     40 weight to qualify, so a lone star cannot fake an empire. Click a row to jump the map there.</p>
+  <div style="margin:6px 0 10px">
+    <span class="lbl">rank by</span>
+    <span class="seg" style="display:inline-flex;margin-left:8px" id="recsort">
+      <button data-rs="share" aria-pressed="true">Share of field</button>
+      <button data-rs="z" aria-pressed="false">Statistical shock (z)</button>
+      <button data-rs="percap" aria-pressed="false">Per capita</button>
+    </span>
+  </div>
+  <div id="recbody" class="empty-note">computing&hellip;</div>
+</section>
+<section class="docs" id="docs">
+  <p style="max-width:78ch">Which countries over- and under-perform in which intellectual fields, measured by
+     quizbowl answer frequency. Pick a domain and era, then click a country to see the people behind
+     the number. Dual nationals default to their country of origin; peoples (Jewish, Scottish, Catalan,
+     Parsi&nbsp;&hellip;) are counted as their own groups by default, and can be folded back into their
+     countries. Practitioners are counted by default; subjects, including legendary and fictional
+     figures, appear under the role toggle.</p>
+  <div class="grid2">
+    <div>
+      <h2>Query the data directly</h2>
+      <p>Everything behind this page is a 4&nbsp;MB SQLite file and a dependency-free JSON API.
+         Start the server, then hit it from a notebook, curl, or the browser.</p>
+      <pre>python3 ~/qbgeo/api.py          # http://127.0.0.1:8077</pre>
+      <p>Every endpoint accepts <code>from</code>/<code>to</code> for a custom birth-year window
+         (overriding <code>era</code>), <code>basis=nationality|birth|work</code>,
+         <code>jewsplit=0|1</code>, and <code>metric=percap|rca|share|count</code>.</p>
+      <pre>GET /fields
+GET /countries?era=Modern
+GET /cell?group=NL&amp;field=Auditory Fine Arts
+GET /matrix?field=Physics&amp;era=Modern&amp;min=8
+GET /people?group=HU&amp;field=Other Science / Math
+GET /top?metric=percap&amp;from=1450&amp;to=1750&amp;min=10
+GET /search?q=pareto
+GET /population?country=IE</pre>
+    </div>
+    <div>
+      <h2>Or go straight to SQL</h2>
+      <p>Three tables: <code>person</code>, <code>person_field</code>, <code>population</code>.</p>
+      <pre>sqlite3 ~/qbgeo/qbgeo.sqlite
+
+SELECT p.nationality, SUM(pf.answerlines) AS n
+FROM person p
+JOIN person_field pf ON pf.person_id = p.id
+WHERE pf.field = 'Auditory Fine Arts'
+  AND p.birth_year BETWEEN 1450 AND 1750
+GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
+      <h2>Raw corpus</h2>
+      <p><code>~/qbgeo/qb.sqlite</code> (401&nbsp;MB) holds every question:
+         188,531 tossups and 477,345 bonus parts from QBReader, 2000&ndash;2026,
+         with full text, category, difficulty, set and year.</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="wrap">
+  <aside>
+    <div class="ctl">
+      <span class="lbl">Domain</span>
+      <div class="combo" id="f-field-combo">
+        <input id="f-field" type="text" autocomplete="off" spellcheck="false" placeholder="pick or type a domain…">
+        <div id="f-field-menu" class="combomenu"></div>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="lbl">Measure</span>
+      <div class="seg" id="f-metric">
+        <button data-m="percap" aria-pressed="true">Per capita</button>
+        <button data-m="rca" aria-pressed="false">RCA</button>
+        <button data-m="share" aria-pressed="false">Share</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="lbl">Era of birth</span>
+      <div class="seg" id="f-era"></div>
+      <div class="seg" id="f-erabasis" style="margin-top:2px">
+        <button data-e="life" aria-pressed="true">Alive during</button>
+        <button data-e="birth" aria-pressed="false">Born during</button>
+      </div>
+      <div class="range">
+        <input type="number" id="f-lo" step="10" aria-label="from year">
+        <span>to</span>
+        <input type="number" id="f-hi" step="10" aria-label="to year">
+        <button id="f-apply">Set</button>
+      </div>
+    </div>
+    <details class="adv">
+      <summary>Advanced</summary>
+      <div class="ctl">
+        <span class="lbl">Peoples</span>
+        <div class="seg" id="f-anc">
+          <button data-a="origin" aria-pressed="false">In country</button>
+          <button data-a="split" aria-pressed="false">Own group</button>
+          <button data-a="both" aria-pressed="true">Count both</button>
+        </div>
+      </div>
+      <div class="ctl">
+        <span class="lbl">Attribute to</span>
+        <div class="seg" id="f-basis">
+          <button data-b="nat" aria-pressed="true">Nationality</button>
+          <button data-b="birth" aria-pressed="false">Birthplace</button>
+          <button data-b="work" aria-pressed="false">Where worked</button>
+        </div>
+      </div>
+      <div class="ctl">
+        <span class="lbl">Dual nationals</span>
+        <div class="seg" id="f-dual">
+          <button data-d="origin" aria-pressed="true">Origin</button>
+          <button data-d="dest" aria-pressed="false">Destination</button>
+          <button data-d="both" aria-pressed="false">Count both</button>
+        </div>
+      </div>
+      <div class="ctl">
+        <span class="lbl">Combine domains</span>
+        <select id="f-multi" multiple size="9"></select>
+        <div class="hint">Cmd/Ctrl-click to pool several. <button type="button" id="f-multiclear">clear</button></div>
+      </div>
+      <div class="ctl">
+        <span class="lbl">Lens</span>
+        <label class="chk"><input type="checkbox" id="f-lens"> <span id="f-lens-lbl">Alternate view</span></label>
+        <div class="hint" id="f-lens-hint">Each field shows who it is really about. The alternate lens flips it: characters (Literature, film, TV), the chroniclers (History, Current Events), or the non-practitioners a field merely name-drops (sciences &amp; the rest).</div>
+        <label class="chk" style="margin-top:6px"><input type="checkbox" id="f-inferred" checked> Include people with no identified discipline</label>
+      </div>
+      <div class="ctl">
+        <span class="lbl">Region</span>
+        <select id="f-region">
+          <option value="all">Everywhere</option>
+          <option value="eur">Europe only</option>
+          <option value="noneur">Exclude Europe</option>
+          <option value="nonwest">Exclude Europe &amp; anglosphere</option>
+          <option value="asia">Asia</option>
+          <option value="africa">Africa</option>
+          <option value="americas">Americas</option>
+          <option value="mena">Middle East &amp; N. Africa</option>
+        </select>
+      </div>
+      <div class="ctl">
+        <span class="lbl">Filters</span>
+        <label class="chk"><input type="checkbox" id="f-conf"> Exclude low confidence</label>
+        <label class="chk"><input type="checkbox" id="f-mentiononly" checked> Include mention-only figures</label>
+        <label class="chk"><input type="checkbox" id="f-fictional" checked> Include fictional figures</label>
+        <label class="chk"><input type="checkbox" id="f-deps"> Show dependent territories on the map (Bermuda, Jersey, Guam&hellip;)</label>
+        <label class="chk"><input type="checkbox" id="f-globallist"> Show global figure list when nothing is selected</label>
+      </div>
+      <div class="ctl">
+        <span class="lbl">Min people per cell — <span class="mono" id="f-minlbl">1</span></span>
+        <input type="range" id="f-min" min="0" max="40" value="1">
+        <div class="hint" style="margin-top:4px"><span></span><button type="button" id="f-reset">reset all filters</button></div>
+      </div>
+    </details>
+  </aside>
+
+  <main>
+    <div class="maphead">
+      <h2 class="maptitle" id="m-field">…</h2>
+      <div class="seg" id="f-view" style="flex:0 0 auto">
+        <button data-v="wld" aria-pressed="true">World</button>
+        <button data-v="eur" aria-pressed="false">Europe</button>
+      </div>
+    </div>
+    <div class="mapwrap">
+      <svg class="map" id="map" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Choropleth of relative comparative advantage by country">
+</svg>
+      <div class="inset">
+        <svg id="inset" viewBox="768 586 130 118" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+        <span class="inset-lbl">Levant &amp; Cyprus &times;7</span>
+      </div>
+
+      <div class="inset car">
+        <svg id="inset2" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+        <span class="inset-lbl">Caribbean</span>
+      </div>
+      <div class="tip" id="tip"></div>
+    </div>
+    <details class="peoplesbox" id="peoplesbox">
+      <summary><span id="ppl-sum">Peoples</span></summary>
+      <div class="grouprow" id="grouprow"></div>
+    </details>
+    <div class="scale">
+      <span class="lbl" id="scale-lo">Under</span>
+      <div class="ramp" id="ramp"></div>
+      <span class="lbl" id="scale-hi">Over</span>
+    <span class="credit2">Made by Stevie Miller &middot; quizbowl canon via qbreader</span>
+      <span id="zero-key" style="display:none;align-items:center;gap:5px"><svg width="15" height="11" aria-hidden="true"><rect width="15" height="11" rx="2" id="zero-swatch"/></svg><span class="lbl">none</span></span>
+      <span class="mono" style="font-size:11px;color:var(--ink-3)"><span id="scale-note">people per capita vs. population share</span></span>
+    </div>
+
+    <div class="warn" id="warn"></div>
+
+    <div id="mback"></div>
+    <aside id="mpanel" aria-hidden="true">
+      <div id="mphead">
+        <div><div id="mptitle"></div><div id="mpsub"></div></div>
+        <button id="mpclose" title="close" aria-label="close">&times;</button>
+      </div>
+      <div id="mpbody"></div>
+    </aside>
+    <div class="rankhead">
+      <div class="lbl">All countries ranked</div>
+      <input type="search" id="f-find" placeholder="find a country…" aria-label="find a country">
+    </div>
+    <div class="lbl" style="display:none">All countries ranked <span id="r-note" style="text-transform:none;letter-spacing:0;font-weight:400"></span></div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr id="rank-head">
+          <th data-k="g">Country</th>
+          <th class="n" data-k="percap">Per capita</th>
+          <th class="n" data-k="rca" id="th-rca">RCA</th>
+          <th class="n" data-k="obs">Weight</th>
+          <th class="n" data-k="n">People</th>
+          <th class="n" data-k="pop">Population</th>
+          <th class="n" data-k="z">z</th>
+          <th class="n" data-k="share">Share</th>
+        </tr></thead>
+        <tbody id="rank"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <div class="panel">
+    <div class="cellhead">
+      <div class="who" id="p-who">Select a country</div>
+      <div class="what" id="p-what">Click any tile on the map or a row in the ranking.</div>
+      <div><span class="verdict" id="p-verdict" style="display:none"></span></div>
+    </div>
+    <div class="metrics" id="p-metrics" style="display:none">
+      <div class="metric"><div class="k">Obs</div><div class="v mono" id="m-obs">—</div></div>
+      <div class="metric"><div class="k">Exp</div><div class="v mono" id="m-exp">—</div></div>
+      <div class="metric"><div class="k">RCA</div><div class="v mono" id="m-rca">—</div></div>
+      <div class="metric"><div class="k">z</div><div class="v mono" id="m-z">—</div></div>
+      <div class="metric"><div class="k">Per capita</div><div class="v mono" id="m-pc">—</div></div>
+      <div class="metric"><div class="k">Population</div><div class="v mono" id="m-pop">—</div></div>
+    </div>
+    <div class="ptabs" id="ptabs" style="display:none">
+      <button data-t="figs" aria-pressed="true">Figures</button>
+      <button data-t="prof" aria-pressed="false">Profile</button>
+    </div>
+    <div class="lbl" id="p-figlbl" style="display:none;margin-bottom:6px">Figures, by frequency</div>
+    <div id="p-prof" style="display:none"></div>
+    <div class="figs" id="p-figs"></div>
+  </div>
+</div>
+
+<footer>
+  Source: QBReader, 2000–2026, difficulty ≥ 3 (middle-school and easy-high-school sets excluded).
+  16,736 people resolved from 126,330 answerlines, deduplicated by identity. Mentions are counted in the field of the question that mentions them, which is often not the field they have answerlines in. RCA is the Balassa index: a country's share of a
+  field divided by its share of all fields, so 1.00 is parity with that country's own baseline.
+  Someone described as “Polish-American” counts as Polish by default; “Count both” adds them to the second country too, which double-counts and inflates totals on purpose. Jewish and Romani ancestry work the same way: counted inside their country by default, or broken out as their own group (Jewish ancestry drawn on Israel), or both. African American is a third group (778 people, 4,558 answerlines), measured against the US Black census series. The Romani group holds four people and 17 answerlines in the whole corpus, so it cannot support a statistic — the absence is the finding. Groups without a territory appear as tiles under the map. Literature, history, religion and mythology are excluded by default because those categories are
+  defined by nationality or by geographic content, which makes RCA within them tautological.
+</footer>
+
+<script src="explorer_data.js"></script>
+<script src="explorer_people_a.js"></script>
+<script src="explorer_people_b.js"></script>
+<script>
+/* DATA, CC, GEO, DEP: see explorer_data.js + explorer_people_{a,b}.js */
+const F=DATA.fields, P=DATA.people, POP=DATA.pop;
+const VOCAB=new Set(DATA.vocab||F.map((_,i)=>i));
+const RENAME={"Literature / Misc":"Misc Literature","Other Fine Arts / Misc Arts":"Misc Arts","Other Science / Math":"Math",
+  "Other Science / Computer Science":"Computer Science","Other Pop Culture":"Misc Pop Culture",
+  "Other Science / Misc Science":"Misc Science"};
+function disp(f){
+  if(RENAME[f]) return RENAME[f];
+  return f.replace(/^(Other Science|Social Science|Other Fine Arts|Other Literature) \/ /,"")
+          .replace(/^Literature \/ /,"");
+}
+const AGG=[
+  ["Movies / Film",["Movies","Other Fine Arts / Film"]],
+  ["All music",["Music","Auditory Fine Arts"]],
+  ["Literature",["Literature","Literature / Poetry","Literature / Drama",
+    "Literature / Long Fiction","Literature / Short Fiction","Literature / Misc"]],
+  ["All sciences",["Physics","Chemistry","Biology","Other Science / Astronomy",
+    "Other Science / Computer Science","Other Science / Earth Science","Other Science / Math","Misc Science"]],
+  ["All fine arts",["Auditory Fine Arts","Visual Fine Arts","Other Fine Arts / Architecture",
+    "Other Fine Arts / Dance","Other Fine Arts / Film","Other Fine Arts / Jazz",
+    "Misc Arts","Other Fine Arts / Opera","Other Fine Arts / Photography"]],
+  ["All social science",["Social Science / Anthropology","Social Science / Economics",
+    "Social Science / Linguistics","Social Science / Psychology","Social Science / Sociology",
+    "Misc Social Science"]],
+  ["All pop culture",["Movies","Music","Sports","Television","Video Games","Misc Pop Culture"]],
+];
+// unified selector: aggregates first, then individual fields
+let SEL=[];
+function buildSel(){
+  SEL=[];
+  for(const [lbl,names] of AGG){
+    const ix=names.map(n=>F.indexOf(n)).filter(i=>i>=0);
+    if(ix.length>1) SEL.push({label:lbl,ix,agg:true});
+  }
+  const COMBINED=new Set(["Movies","Other Fine Arts / Film","Literature"]); // shown only pooled
+  const singles=F.map((f,i)=>({label:disp(f),ix:[i],agg:false}))
+                 .filter(o=>!COMBINED.has(F[o.ix[0]]))
+                 .sort((a,b)=>a.label.localeCompare(b.label));
+  SEL=SEL.concat(singles);
+  SEL.push({label:"Everything pooled",ix:F.map((_,i)=>i),agg:true});
+}
+const ERAS=[["All",-9999,9999],["Ancient",-9999,499],["Medieval",500,1449],
+            ["Early Modern",1450,1749],["19th C",1750,1879],["Modern",1880,1999],
+            ["Contemporary",2000,9999]];
+let S={field:0,era:0,lo:null,hi:null,metric:"percap",tab:"figs",sortK:"percap",sortAsc:false,basis:"nat",inferred:true,
+       dual:"origin",anc:"both",erabasis:"life",find:"",fieldbasis:"disc",role:"p",region:"all",multi:null,conf:false,mentonly:true,fict:true,deps:false,globallist:false,min:0,sel:null,view:"wld",lens:false};
+
+const $=id=>document.getElementById(id);
+const Z={k:1,cx:0,cy:0,w:1000,h:563,view:null,lod:false};
+const HDK=1.6;
+const DOTK=9;                                // a polygon this many on-screen viewBox units wide no longer needs its dot
+const ZMAX=10;                               // zoomAt's ceiling; at max zoom every dot goes unless the island has no polygon at all
+const _EXT={};
+function extOf(layer,cc){                    // largest single ring of cc's polygon in that layer, viewBox units; 0 = nothing drawn
+  const key=layer+":"+cc; if(key in _EXT) return _EXT[key];
+  const P=layer==="terr"?GEO.terr:(GEO[layer]&&GEO[layer].p); const d=P&&P[cc]; let best=0;
+  if(d) for(const ring of d.split("M")){ if(!ring) continue; let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+    for(const pt of ring.replace("Z","").split("L")){ const i=pt.indexOf(","); if(i<0) continue;
+      const x=+pt.slice(0,i), y=+pt.slice(i+1); if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+    if(x1>=x0) best=Math.max(best,x1-x0,y1-y0); }
+  return _EXT[key]=best;
+}
+// deterministic: a dot is visible iff its polygon is still too small to click at this zoom
+// (ext*k < DOTK) and we are not at max zoom; polygon-less islands (Seychelles, Barbados, Malta) keep theirs always
+function dotHidden(ext,k){ return ext>0 && (ext*k>=DOTK || k>=ZMAX-0.01); }
+function resizeDots(){                       // cheap: only touches the ~dozens of dot markers
+  const svg=$("map"); if(!svg) return;
+  const dr=Math.max(4.2/Z.k,1.3).toFixed(2);
+  for(const c of svg.querySelectorAll("circle")){
+    c.setAttribute("r",dr);
+    c.style.display = dotHidden(+c.dataset.ext||0, Z.k) ? "none" : "";
+  }
+}
+function applyZoom(){                        // hot path: viewBox only + dot resize, no re-render
+  const svg=$("map"); if(!svg) return;
+  if(Z.k<=1.001){ Z.k=1; Z.cx=0; Z.cy=0; svg.setAttribute("viewBox",`0 0 ${Z.w} ${Z.h}`); }
+  else {
+    const vw=Z.w/Z.k, vh=Z.h/Z.k;
+    Z.cx=Math.max(0,Math.min(Z.w-vw,Z.cx)); Z.cy=Math.max(0,Math.min(Z.h-vh,Z.cy));
+    svg.setAttribute("viewBox",`${Z.cx.toFixed(1)} ${Z.cy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`);
+  }
+  resizeDots();
+  clearTimeout(Z.rr);                        // defer the one heavy op (detail swap) until zoom settles
+  Z.rr=setTimeout(()=>{ const lod=Z.k>=HDK; if(lod!==Z.lod){ Z.lod=lod; render(); } },170);
+}
+function zoomAt(px,py,nk){
+  nk=Math.max(1,Math.min(10,nk));
+  const vw=Z.w/Z.k, vh=Z.h/Z.k, wx=Z.cx+px*vw, wy=Z.cy+py*vh;
+  Z.k=nk; const vw2=Z.w/Z.k, vh2=Z.h/Z.k;
+  Z.cx=wx-px*vw2; Z.cy=wy-py*vh2; applyZoom();
+}
+(function(){
+  const svg=document.getElementById("map"); if(!svg) return;
+  let dragging=false, moved=false, lx=0, ly=0;
+  svg.addEventListener("wheel",e=>{
+    if(!e.ctrlKey&&!e.metaKey) return;
+    e.preventDefault();
+    const r=svg.getBoundingClientRect();
+    zoomAt((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height,Z.k*Math.exp(-e.deltaY*0.002));
+  },{passive:false});
+  svg.addEventListener("dblclick",e=>{
+    const r=svg.getBoundingClientRect();
+    if(Z.k>1){ Z.k=1; applyZoom(); }
+    else zoomAt((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height,3.2);
+  });
+  svg.addEventListener("pointerdown",e=>{
+    if(Z.k<=1) return;
+    dragging=true; moved=false; lx=e.clientX; ly=e.clientY;   // no pointer capture:
+  });                                                          // clicks must reach the paths
+  window.addEventListener("pointermove",e=>{
+    if(!dragging) return;
+    const r=svg.getBoundingClientRect();
+    const dx=e.clientX-lx, dy=e.clientY-ly;
+    if(Math.abs(dx)+Math.abs(dy)>3) moved=true;
+    if(moved){ Z.cx-=dx/r.width*(Z.w/Z.k); Z.cy-=dy/r.height*(Z.h/Z.k);
+      lx=e.clientX; ly=e.clientY; applyZoom(); }
+  });
+  window.addEventListener("pointerup",()=>{dragging=false;});
+  svg.addEventListener("click",e=>{ if(moved){ e.stopPropagation(); moved=false; } },true);
+  svg.addEventListener("click",e=>{ if(e.target===svg && S.sel!==null){ S.sel=null; render(); } });
+})();
+const RCAF=v=>(v==null||!isFinite(v))?"\u2014":v.toFixed(2);
+const ZF=v=>(v==null||!isFinite(v))?"\u2014":(v>0?"+":"")+v.toFixed(1);
+const fmt=v=>v===null||v===undefined?"—":(S.metric==="share"?(v*100).toFixed(1)+"%":(v<10?v.toFixed(2):v.toFixed(0)));
+const curLabel=()=>(S.multi&&S.multi.length)
+  ? (S.multi.length<=3 ? S.multi.map(i=>disp(F[i])).join(" + ") : `${S.multi.length} domains pooled`)
+  : (SEL[S.field]?SEL[S.field].label:"");
+const MLBL=()=>S.metric==="rca"?"RCA":S.metric==="share"?"share":"per-capita";
+const EUR=new Set("AL AD AT BY BE BA BG HR CY CZ DK EE FI FR DE GR HU IS IE IT XK LV LI LT LU MT MD MC ME NL MK NO PL PT RO RU SM RS SK SI ES SE CH UA GB VA ENG SCT WLS NIR CATA BASQ FO GG JE IM AX GI SJ".split(" "));
+const ANGLO=new Set("US GB CA AU NZ IE ENG SCT WLS NIR QUEB".split(" "));
+const TERRP=new Set("CATA BASQ QUEB AFRI".split(" "));   // region-bound peoples: filtered by geography, not exempt
+const REGION={
+  all:()=>true,
+  eur:g=>EUR.has(g),
+  noneur:g=>!EUR.has(g),
+  nonwest:g=>!EUR.has(g)&&!ANGLO.has(g),
+  asia:g=>"AF AM AZ BH BD BT BN KH CN CY GE IN ID IR IQ IL JP JO KZ KW KG LA LB MY MV MN MM NP KP KR OM PK PS PH QA SA SG LK SY TW TJ TH TL TR TM AE UZ VN YE".split(" ").includes(g),
+  africa:g=>"DZ AO BJ BW BF BI CM CV CF TD KM CD CG CI DJ EG GQ ER SZ ET GA GM GH GN GW KE LS LR LY MG MW ML MR MU MA MZ NA NE NG RW ST SN SC SL SO ZA SS SD TZ TG TN UG ZM ZW AFRI".split(" ").includes(g),
+  americas:g=>"AG AR BS BB BZ BO BR CA CL CO CR CU DM DO EC SV GD GT GY HT HN JM MX NI PA PY PE KN LC VC SR TT US UY VE PR MQ GP GF QUEB".split(" ").includes(g),
+  mena:g=>"DZ BH EG IR IQ IL JO KW LB LY MA OM PS QA SA SY TN AE YE TR".split(" ").includes(g),
+};
+const EST=new Set(DATA.pop_estimated||[]);
+const GROUPS=DATA.groups||[{code:"JEW",name:"Jewish ancestry"},{code:"ROMA",name:"Romani ancestry"},{code:"AFAM",name:"African American"}];
+const GSET=new Set(GROUPS.map(g=>g.code));
+const GNAME={}; for(const g of GROUPS) GNAME[g.code]=g.name;
+const NAME=g=>GNAME[g]||CC[g]||g;
+const LITF=new Set(F.map((f,i)=>f.startsWith("Literature")?i:-1).filter(i=>i>=0));   // every Literature genre field
+// --- Field-kind model (paradigm rebuild) -----------------------------------
+// Each field is one of: narrative (creators default / characters lens), chronicle (figures default /
+// strict-practitioners lens), religion, mythology, or world (practitioners default / named-not-
+// practitioner lens). Membership is computed from discipline (p[9]) + fictional flag (p[19]) + canon.
+const KIND=F.map(f=>{
+  if(/^Literature/.test(f)||f==="Movies"||f==="Other Fine Arts / Film"||f==="Television") return "narrative";
+  if(f==="History"||f==="Current Events") return "chronicle";
+  if(f==="Religion") return "religion";
+  if(f==="Mythology") return "mythology";
+  return "world";
+});
+const P_DISC=P.map(p=>new Set(p[9]||[]));   // discipline field indices per person
+// folk/legendary real people who ALSO belong in Mythology (curated; Wikidata tags them only "human").
+// They keep their real field AND appear in Mythology. (Mirrors folk_myth.json.)
+const FOLK=new Set(["George Washington","Johnny Appleseed","Davy Crockett","Daniel Boone","Paul Revere",
+  "Pocahontas","Molly Pitcher","Casey Jones","Annie Oakley","Wyatt Earp","Billy the Kid","Jesse James",
+  "Kit Carson","Calamity Jane","Buffalo Bill","Sacagawea","William Tell","Robin Hood","Lady Godiva",
+  "Rob Roy","El Cid","Saladin","Ned Kelly"]);
+// membership weight of person i in field fi (canon weight n) under a lens ("default"|"alt")
+function memberW(i,fi,n,lens){
+  if(n<=0) return 0;
+  const k=KIND[fi], pr=P_DISC[i].has(fi), fic=!!P[i][19], topf=(P[i][8].length?P[i][8][0][0]:-1);
+  if(k==="narrative") return lens==="alt" ? (fic?n:0) : ((pr&&!fic)?n:0);
+  if(k==="chronicle") return lens==="alt" ? (pr?n:0)  : ((!pr)?n:0);
+  if(k==="mythology") return (fic||FOLK.has(P[i][0]))?n:0;
+  if(k==="religion")  return (!fic && (pr || fi===topf))?n:0;
+  return lens==="alt" ? (!pr?n:0) : (pr?n:0);     // world
+}
+// dependent territories (dependencies.json) are off the map and the ranking unless S.deps;
+// their people still count in every field total and baseline (Stevie, Sep 11 2026)
+const hideDep=cc=>!S.deps&&DEP.has(cc);
+const CHIP=g=>(GNAME[g]||g).replace(" ancestry","");
+const isDark=()=>{const t=document.documentElement.getAttribute("data-theme");
+  return t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches);};
+
+let SCALEMAX=1; let POOLED_ALL=false;                     // set per render; only used by the sequential (share) ramp
+function color(v){
+  if(v===null||v===undefined||!isFinite(v)) return null;
+  const dark=isDark();
+  if(S.metric==="share"){           // sequential: 0 -> max observed, no meaningful midpoint
+    const a=Math.max(0,Math.min(1,SCALEMAX>0?v/SCALEMAX:0));
+    const t=Math.sqrt(a);           // sqrt so small shares stay distinguishable
+    const L=dark?(16+t*46):(97-t*52), Sa=dark?(24+t*52):(20+t*60);
+    return `hsl(35 ${Sa}% ${L}%)`;
+  }
+  if(v===0){                                  // a measured nothing: darker than any real value
+    return dark ? "hsl(212 62% 14%)" : "hsl(212 74% 34%)";
+  }
+  // non-zero values stop short of the extreme so 0 stays distinguishable
+  const lg=Math.log2(v);
+  const l = lg>=0 ? Math.min(3,lg)/3 : -Math.min(4.6,-lg)/4.6;
+  const h=l>=0?35:212, a=Math.abs(l);
+  const L=dark?(20+a*44):(96-a*46), Sa=dark?(30+a*45):(28+a*52);
+  return `hsl(${h} ${Sa}% ${L}%)`;
+}
+function textOn(v){
+  if(v===null||v===undefined) return "var(--ink-3)";
+  const a=S.metric==="share"
+    ? Math.sqrt(Math.max(0,Math.min(1,SCALEMAX>0?v/SCALEMAX:0)))
+    : Math.abs(Math.max(-3,Math.min(3,Math.log2(v)))/3);
+  if(isDark()) return a>.45?"#0e1219":"var(--ink)";
+  return a>.55?"#fff":"var(--ink)";
+}
+
+function win(){ if(S.lo!==null) return [S.lo,S.hi];
+  const e=ERAS[S.era]; return S.era===0?[-9999,9999]:[e[1],e[2]]; }
+const STATE_V=23;
+const HASHP={_m:{},get(k){return this._m[k]??null}};
+for(const kv of (location.hash.slice(1)||"").split("&")){
+  const i=kv.indexOf("="); if(i>0) HASHP._m[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1));
+}      // bump whenever a default changes, so stale state is discarded
+const NOW=2026;
+function span(p){                       // active years: birth..death, or birth..now if living
+  const b=p[4]; if(b===null||b===undefined) return null;
+  const d=p[15];
+  const end = d===-1 ? NOW : (d===null||d===undefined ? Math.min(NOW,b+72) : d);
+  return [b,Math.max(b,end)];
+}
+function inEra(p){
+  const [a,b]=win(); if(a<=-9999&&b>=9999) return true;
+  if(S.erabasis==="birth"){ const y=p[4]; return y!==null&&y!==undefined&&y>=a&&y<=b; }
+  const s=span(p); if(!s) return false;
+  return s[0]<=b && s[1]>=a;            // lifespan overlaps the window
+}
+function popOf(g){ const s=POP[g]; if(!s) return null; const [a,b]=win();
+  let v=s.filter(r=>r[0]>=a&&r[0]<=b).map(r=>r[1]);
+  if(!v.length){ let best=null,bd=1e9; for(const r of s){const d=Math.min(Math.abs(r[0]-a),Math.abs(r[0]-b));
+    if(d<bd){bd=d;best=r[1];}} return best; }
+  return v.reduce((x,y)=>x+y,0)/v.length; }
+
+function compute(){
+  const FIX=new Set(S.multi&&S.multi.length?S.multi:(SEL[S.field]?SEL[S.field].ix:[]));
+  POOLED_ALL = FIX.size>=F.length;
+  const cell=new Map(), G=new Map(), Ftot=new Map(); let T=0;
+  const members=new Map();
+  for(let i=0;i<P.length;i++){
+    const p=P[i];
+    if(S.conf&&p[7]===0) continue;
+    if(!S.mentonly&&p[21]) continue;
+    if(!S.fict&&p[19]) continue;                 // "Include fictional figures" off -> hide legendary/fictional
+    if(!inEra(p)) continue;
+    let home=S.basis==="nat"?p[1]:S.basis==="birth"?p[2]:p[3];
+    if(S.basis==="nat"&&S.dual==="dest"&&p[12]) home=p[12];
+    let gs=[];
+    const pg=p[20]||[];                       // peoples membership, built in the pipeline
+    if(S.anc!=="origin"&&pg.length){
+      gs=pg.slice();
+      if(S.anc==="both"&&home) gs.push(home);
+    } else if(home) gs.push(home);
+    if(S.dual==="both"&&S.basis==="nat"&&p[12]&&!gs.includes(p[12])) gs.push(p[12]);
+    const rf=REGION[S.region]||REGION.all;
+    gs=gs.filter(g=>(GSET.has(g)&&!EUR.has(g)&&!ANGLO.has(g)&&!TERRP.has(g))||rf(g));
+    if(!gs.length) continue;
+    const fl=p[8];                             // canon weights (answerlines + mentions, pooled)
+    // PARADIGM: membership by field-kind. The active lens applies to the SELECTED field(s); every
+    // other field uses its default membership (so cross-field totals / RCA stay consistent).
+    for(const [fi,n] of fl){
+      const isSel=FIX.has(fi);
+      const lens = (isSel && S.lens) ? "alt" : "default";
+      const w=memberW(i,fi,n,lens);
+      if(w<=0) continue;
+      for(const g of gs){
+        cell.set(g+"|"+(isSel?"SEL":fi),(cell.get(g+"|"+(isSel?"SEL":fi))||0)+w);
+        G.set(g,(G.get(g)||0)+w);
+        T+=w;
+        if(isSel){
+          Ftot.set("SEL",(Ftot.get("SEL")||0)+w);
+          if(!members.has(g)) members.set(g,[]);
+          const mm=members.get(g); const at=mm.findIndex(r=>r[0]===i);
+          if(at>=0) mm[at][1]+=w; else mm.push([i,w]);
+        } else Ftot.set(fi,(Ftot.get(fi)||0)+w);
+      }
+    }
+  }
+  let popTot=0; for(const g of G.keys()){const v=popOf(g); if(v) popTot+=v;}
+  return {cell,G,Ftot,T,members,popTot};
+}
+
+function statFor(C,g){
+  const w=C.cell.get(g+"|SEL")||0;
+  const ft=C.Ftot.get("SEL")||0, gt=C.G.get(g)||0;
+  if(!ft||!C.T) return null;
+  const pop=popOf(g);
+  // gt===0 means nobody from g is in the canon at all this era. Share and
+  // per-capita are still defined (they are zero); RCA and z are 0/0, so null.
+  if(!gt&&!pop) return null;
+  if(!w&&S.min>0) return null;
+  const exp=gt*ft/C.T;
+  const rca=gt?(w/ft)/(gt/C.T):null, share=w/ft;
+  let percap=null, perM=null;
+  if(pop&&C.popTot){ percap=share/(pop/C.popTot); perM=w/pop; }
+  const val = S.metric==="rca"?rca : S.metric==="share"?share : percap;
+  return {obs:w,exp,rca,z:gt?(w-exp)/Math.sqrt(exp):null,share,pop,percap,perM,val,
+          n:(C.members.get(g)||[]).length,absent:!gt};
+}
+
+function syncControls(){
+  if(document.activeElement!==fs) fs.value=SEL[S.field]?SEL[S.field].label:"";
+  $("f-min").value=S.min; $("f-minlbl").textContent=S.min;
+  $("f-conf").checked=S.conf;
+  $("f-mentiononly").checked=S.mentonly;
+  $("f-fictional").checked=S.fict;
+  $("f-deps").checked=S.deps;
+  $("f-globallist").checked=S.globallist;
+  const rb=[...$("f-metric").children].find(b=>b.dataset.m==="rca");
+  if(rb){ rb.disabled=POOLED_ALL; rb.style.opacity=POOLED_ALL?".4":""; 
+          rb.title=POOLED_ALL?"RCA is degenerate when every domain is pooled":""; }
+  $("f-region").value=S.region;
+  $("f-inferred").checked=S.inferred;
+  if($("f-lens")){
+    $("f-lens").checked=S.lens;
+    const _fi=(SEL[S.field]&&SEL[S.field].ix&&SEL[S.field].ix.length===1)?SEL[S.field].ix[0]:-1;
+    const _k=_fi>=0?KIND[_fi]:null;
+    const _lbl={narrative:"Show characters",chronicle:"Show the chroniclers (historians/journalists)",
+                world:"Show non-practitioners the field name-drops"}[_k]||"Alternate view";
+    const el=$("f-lens-lbl"); if(el) el.textContent=_lbl;
+    const dis=(_k==="mythology"||_k==="religion");           // no alternate lens for these
+    $("f-lens").disabled=dis; $("f-lens").parentElement.style.opacity=dis?".45":"";
+  }
+  if($("f-find").value!==S.find) $("f-find").value=S.find;
+  const segs=[["f-metric","m","metric"],["f-dual","d","dual"],["f-anc","a","anc"],
+              ["f-basis","b","basis"],["f-view","v","view"],["f-erabasis","e","erabasis"],["f-fieldbasis","f","fieldbasis"],["f-role","r","role"]];
+  for(const [id,attr,key] of segs){
+    const el=$(id); if(!el) continue;
+    [...el.children].forEach(b=>b.setAttribute("aria-pressed",b.dataset[attr]===S[key]?"true":"false"));
+  }
+  [...es.children].forEach((c,j)=>c.setAttribute("aria-pressed",(S.lo===null&&j===S.era)?"true":"false"));
+  if(S.lo!==null){ $("f-lo").value=S.lo; $("f-hi").value=S.hi; }
+  try{ sessionStorage.setItem("atlas",JSON.stringify(Object.assign({_v:STATE_V},S))); }catch(e){}
+}
+function profileFor(g){
+  // RCA of one group across every field (current window) and across every era (all fields)
+  const byField=[], byEra=[], thinField=[];
+  const saveF=S.field, saveE=S.era, saveLo=S.lo, saveHi=S.hi;
+  for(let i=0;i<SEL.length;i++){
+    if(SEL[i].agg) continue;
+    S.field=i;
+    const C=compute(), st=statFor(C,g);
+    if(st&&st.n>=Math.max(2,Math.min(S.min,3))) byField.push({label:SEL[i].label,...st});
+    else if(st&&st.n>=1) thinField.push({label:SEL[i].label,...st});
+  }
+  S.field=saveF;
+  for(let e=1;e<ERAS.length;e++){
+    S.era=e; S.lo=null; S.hi=null;
+    const C=compute(), st=statFor(C,g);
+    if(st&&st.n>=1) byEra.push({label:ERAS[e][0],...st});
+  }
+  S.era=saveE; S.lo=saveLo; S.hi=saveHi;
+  if(byField.length) return {byField,byEra,thinField,thin:false};
+  return {byField:thinField,byEra,thinField:[],thin:true};   // nothing clears n>=2: show the thin cells as the profile
+}
+function renderProfile(g){
+  const box=$("p-prof"); box.innerHTML="";
+  const {byField,byEra,thinField,thin}=profileFor(g);
+  if(!byField.length){
+    const why=[];
+    if(S.role==="p") why.push("the Practitioners filter is hiding subjects");
+    if(S.role==="s") why.push("the Subjects filter is hiding practitioners");
+    if(S.anc!=="origin") why.push("peoples are counted separately (Own group)");
+    box.innerHTML='<div class="empty-note">No one from '+NAME(g)+' clears even a one-person floor here'
+      +(why.length?' — '+why.join("; ")+'. Try Both roles or In-country ancestry.':'.')+'</div>';
+    return;
+  }
+  if(thin) box.innerHTML='<div class="empty-note">Every cell below is a single person under the current filters — read the ratios loosely.</div>';
+  box.innerHTML+='<div class="plegend"><i class="sw over"></i>over-represented'
+    +'<i class="sw under"></i>under-represented<span>1.00 = exactly proportional share</span></div>';
+  const sec=(title,rows,note)=>{
+    const d=document.createElement("div"); d.className="psec";
+    d.innerHTML=`<h4>${title}</h4>`;
+    for(const r of rows){
+      const el=document.createElement("div"); el.className="prow";
+      const _ov=r.rca>=1, _ratio=_ov?r.rca:(r.rca>0?1/r.rca:0);
+      el.title=`${r.label}: ${_ratio.toFixed(1)}× ${_ov?"above":"below"} this ${GSET.has(g)?"people's":"country's"} proportional share`;
+      el.innerHTML=`<span class="pn">${r.label}</span>
+        <span class="pv" style="color:${_ov?'var(--pos)':'var(--neg)'}">${RCAF(r.rca)}<small class="pvw">${_ov?"over":"under"}</small></span>
+        <span class="pc">${r.obs<10?r.obs.toFixed(1):r.obs.toFixed(0)} · z${ZF(r.z)}</span>
+        <div class="pbar" style="background:${color(r.rca)};width:${Math.min(100,Math.abs(Math.log2(r.rca))/3*100)}%"></div>`;
+      d.appendChild(el);
+    }
+    if(note){ const n=document.createElement("div"); n.className="empty-note"; n.style.padding="6px 0 0";
+              n.textContent=note; d.appendChild(n); }
+    box.appendChild(d);
+  };
+  const sorted=[...byField].sort((a,b)=>b.rca-a.rca);
+  if(sorted.length>16){                      // enough cells for the split to mean something
+    sec("Strongest domains (RCA)",sorted.slice(0,8));
+    sec("Weakest domains (RCA)",sorted.slice(-8).reverse());
+  } else {                                    // otherwise one honest ranking, no overlap possible
+    sec(`All ${sorted.length} domain${sorted.length===1?"":"s"}, strongest first`,sorted);
+  }
+  if(thinField&&thinField.length){
+    const tf=[...thinField].sort((a,b)=>b.rca-a.rca);
+    sec(`Single-person domains (${tf.length})`,tf.slice(0,14),
+      "One person each under the current filters — a ratio, not a verdict.");
+  }
+  if(byEra.length) sec(`By period — ${curLabel()}`,byEra,
+    "RCA within each era, so eras with thin coverage do not distort the comparison.");
+}
+function render(){
+  if(S.sel!==null&&S.sel!==undefined&&hideDep(S.sel)) S.sel=null;
+  syncControls();
+  let C=compute();
+  if(POOLED_ALL){
+    if(S.metric==="rca"){ S.metric="percap"; syncControls(); C=compute(); }
+    if(S.sortK==="rca"||S.sortK==="z"){ S.sortK="percap"; S.sortAsc=false; }
+  }
+  SCALEMAX=0;
+  if(S.metric==="share"){
+    for(const g of C.G.keys()){ const st0=statFor(C,g);
+      if(st0&&st0.n>=S.min&&st0.val>SCALEMAX) SCALEMAX=st0.val; }
+    if(!SCALEMAX) SCALEMAX=1;
+  }
+  { const [wa2,wb2]=win();
+  const eraLbl = S.lo!==null ? `${wa2}\u2013${wb2}` : ERAS[S.era][0]==="All" ? "All eras" : ERAS[S.era][0];
+  $("m-field").textContent = `${curLabel()} \u00b7 ${eraLbl} \u00b7 ${MLBL()==="per capita"?"per capita":MLBL()}`; }
+  const ppl=new Set(); let q=0;
+  for(const [k,v] of C.cell) q+=v;
+  $("s-people").textContent=P.length.toLocaleString();
+  $("s-q").textContent=Math.round(C.T).toLocaleString();
+  $("s-c").textContent=[...C.G.keys()].filter(g=>!hideDep(g)).length.toLocaleString();
+  $("f-minlbl").textContent=S.min===0?"0 (show empty)":S.min;
+  $("scale-note").textContent=S.metric==="rca"?"RCA vs. the country\u2019s own output"
+    :S.metric==="share"?"share of the whole field":"output vs. share of population";
+
+  // map
+  const HDON = S.view==="wld" && Z.k>=HDK && GEO.wldhd;
+  Z.lod = S.view==="wld" && Z.k>=HDK;
+  let G;
+  if(S.view==="wld"){
+    const pp=Object.assign({}, GEO.wld.p);
+    if(HDON) Object.assign(pp, GEO.wldhd.p);
+    if(GEO.terr) Object.assign(pp, GEO.terr);   // GF etc. painted by their own stat, over the parent
+    G=Object.assign({},GEO.wld,{p:pp});
+  } else G=GEO[S.view];
+  const svg=$("map"), tip=$("tip");
+  svg.setAttribute("viewBox",`0 0 ${G.w} ${G.h}`);
+  svg.parentElement.classList.toggle("eurv",S.view==="eur");
+  if(Z.view!==S.view){ Z.view=S.view; Z.k=1; }
+  Z.w=G.w; Z.h=G.h; applyZoom();
+  svg.innerHTML="";
+  const frag=document.createDocumentFragment();
+  const anc=S.anc!=="origin";
+  const PMAP={IL:"JEW",AM:"ARMN",BD:"BENG"};
+  const UKS=["ENG","SCT","WLS","NIR"];
+  const remapG=S.anc==="split";
+  const entries=[];
+  for(const [cc,d] of Object.entries(G.p)){
+    if(UKS.includes(cc)){ if(anc) entries.push([cc,d]); continue; }  // nations only when peoples split
+    if(cc==="GB"&&anc) continue;                                     // the union dissolves into them
+    entries.push([(remapG&&PMAP[cc])?PMAP[cc]:cc,d]);
+  }
+  const rfMap=REGION[S.region]||REGION.all;
+  for(const [cc,dstr] of entries){
+    if(cc==="VA"||cc==="AQ") continue;          // Antarctica isn't a data cell; leave it as water
+    if(hideDep(cc)){                              // dependency: keep the coastline, nothing to paint or click
+      const el0=document.createElementNS("http://www.w3.org/2000/svg","path");
+      el0.setAttribute("d",dstr); el0.setAttribute("class","nodata"); el0.setAttribute("fill","var(--surface-2)");
+      frag.appendChild(el0); continue; }
+    // draw only if it survives the region filter: a diaspora people, or a country/territory
+    // that passes rf. Territorial peoples (ENG/SCT/… and CATA/BASQ/QUEB/AFRI) obey geography.
+    if(!((GSET.has(cc)&&!EUR.has(cc)&&!ANGLO.has(cc)&&!TERRP.has(cc))||rfMap(cc))) continue;
+    const st=statFor(C,cc), ok=st&&(S.min===0?st.n>0:st.n>=S.min);
+    const isZero0 = S.min===0 && st && st.n===0;
+    const el=document.createElementNS("http://www.w3.org/2000/svg","path");
+    el.setAttribute("d",dstr);
+    if(ok){ el.setAttribute("fill",color(st.val));  }
+    else if(isZero0){ el.setAttribute("fill",color(0)); }
+    else { el.setAttribute("class","nodata"); el.setAttribute("fill","var(--surface-2)"); }
+    let cls2=((ok||isZero0)?"":"nodata ")+(S.sel===cc?"sel ":"")+(GSET.has(cc)?"ancgroup":"");
+    if(cls2.trim()) el.setAttribute("class",cls2.trim());
+    if(ok||isZero0){
+      el.addEventListener("click",()=>{S.sel=cc;render();});
+      el.addEventListener("mousemove",ev=>{
+        const r=svg.parentElement.getBoundingClientRect();
+        tip.innerHTML = st.n===0 ? `<b>${NAME(cc)}</b><br>${st.absent?`no one at all in ${ERAS[S.era][0]}`:`no one in ${curLabel()}`}` : `<b>${NAME(cc)}</b> · ${st.n} ${st.n===1?"person":"people"}<br>${MLBL()} ${MLBL()==="share"?(st.val*100).toFixed(1)+"%":fmt(st.val)} · RCA ${RCAF(st.rca)} · z ${ZF(st.z)}`;
+        tip.classList.add("on");
+        let x=ev.clientX-r.left+13, y=ev.clientY-r.top+13;
+        if(x+tip.offsetWidth>r.width) x=ev.clientX-r.left-tip.offsetWidth-13;
+        if(y+tip.offsetHeight>r.height) y=ev.clientY-r.top-tip.offsetHeight-13;
+        tip.style.left=x+"px"; tip.style.top=y+"px";
+      });
+      el.addEventListener("mouseleave",()=>tip.classList.remove("on"));
+    }
+    frag.appendChild(el);
+  }
+  // tiny states get a clickable dot so they are reachable at map scale
+  const CEN=G.c||{};
+  for(const [cc,ce] of Object.entries(CEN)){
+    if(cc==="PS") continue;                      // its dot sits on Israel's sliver; reach Palestine via the Levant inset
+    if(hideDep(cc)) continue;                    // Bermuda, Jersey, Guam… stay off the map
+    if(GEO.terr&&GEO.terr[cc]) continue;         // overseas territory now drawn as its own polygon
+    if(UKS.includes(cc)&&!anc) continue;
+    if(cc==="GB"&&anc) continue;
+    // extent of the polygon actually drawn for cc at this detail level (0 when it has none)
+    const ext = S.view!=="wld" ? extOf(S.view,cc) : ((HDON&&GEO.wldhd.p[cc]) ? extOf("wldhd",cc) : extOf("wld",cc));
+    if(ext>=DOTK) continue;                      // clickable even at 1x: never needs a dot
+    const key=(remapG&&PMAP[cc])?PMAP[cc]:cc;
+    const st=statFor(C,key), ok=st&&(S.min===0?st.n>0:st.n>=S.min);
+    // at min=0, an island with population but nobody in the current filter still gets a
+    // measured-zero dot, mirroring the dark zero polygons the mainland map already shows
+    const rf0=REGION[S.region]||REGION.all;
+    const isZd=S.min===0 && st && st.n===0;     // an actual measured zero, like the mainlands; blank otherwise
+    if(!ok&&!isZd) continue;
+    const m=document.createElementNS("http://www.w3.org/2000/svg","circle");
+    m.dataset.cc=cc; m.dataset.ext=ext;
+    const dr=Math.max(4.2/Z.k, 1.3).toFixed(2);   // shrink with zoom but never vanish
+    m.setAttribute("cx",ce[0]); m.setAttribute("cy",ce[1]); m.setAttribute("r",dr);
+    m.setAttribute("fill",ok?color(st.val):color(0));
+    m.setAttribute("stroke",S.sel===key?"var(--map-sel)":"var(--surface)");
+    m.setAttribute("stroke-width",S.sel===key?2.4:1.4);   // screen px via non-scaling-stroke
+    m.style.cursor="pointer";
+    m.addEventListener("click",()=>{S.sel=key;render();});
+    m.addEventListener("mousemove",ev=>{
+      const r=svg.parentElement.getBoundingClientRect();
+      tip.innerHTML = st.n===0 ? `<b>${NAME(key)}</b><br>no one in ${curLabel()}`
+        : `<b>${NAME(key)}</b> · ${st.n} ${st.n===1?"person":"people"}<br>${MLBL()} ${fmt(st.val)} · RCA ${RCAF(st.rca)}`;
+      tip.classList.add("on");
+      tip.style.left=Math.max(4,ev.clientX-r.left+13)+"px"; tip.style.top=Math.max(4,ev.clientY-r.top+13)+"px";
+    });
+    m.addEventListener("mouseleave",()=>tip.classList.remove("on"));
+    frag.appendChild(m);
+  }
+  svg.appendChild(frag);
+  // raise the selected country's path so its outline isn't overpainted by neighbors drawn after it
+  // (landlocked picks like Uzbekistan lose their border to adjacent fills otherwise)
+  svg.querySelectorAll("path.sel").forEach(p=>svg.appendChild(p));
+  resizeDots();                                // apply the zoom-visibility rule to the freshly built dots
+
+  // Levant inset — same paths, magnified, so Israel/JEW is clickable
+  const ins=$("inset");
+  if(ins){
+    ins.innerHTML="";
+    const f2=document.createDocumentFragment();
+    // always the fine-grained Europe projection: world paths are too coarse at 7x
+    const insetEntries=[];
+    for(const [cc,d] of Object.entries(GEO.eur.p)){
+      if(cc==="VA") continue;
+      if(UKS.includes(cc)){ if(anc) insetEntries.push([cc,d]); continue; }
+      if(cc==="GB"&&anc) continue;
+      insetEntries.push([(remapG&&PMAP[cc])?PMAP[cc]:cc,d]);
+    }
+    for(const [cc,dstr] of insetEntries){
+      const st=statFor(C,cc), ok=!hideDep(cc)&&st&&(S.min===0?st.n>0:st.n>=S.min);
+      const isZero = !hideDep(cc) && S.min===0 && st && st.n===0;
+      const el=document.createElementNS("http://www.w3.org/2000/svg","path");
+      el.setAttribute("d",dstr);
+      if(ok) el.setAttribute("fill",color(st.val));
+      else if(isZero) el.setAttribute("fill",color(0));
+      else { el.setAttribute("class","nodata"); el.setAttribute("fill","var(--line)"); }
+      let cls=((ok||isZero)?"":"nodata ")+(S.sel===cc?"sel ":"")+(GSET.has(cc)?"ancgroup":"");
+      if(cls.trim()) el.setAttribute("class",cls.trim());
+      if(ok||isZero){
+        el.addEventListener("click",()=>{S.sel=cc;render();});
+        el.addEventListener("mousemove",ev=>{
+          const r=svg.parentElement.getBoundingClientRect();
+          tip.innerHTML = st.n===0 ? `<b>${NAME(cc)}</b><br>${st.absent?`no one at all in ${ERAS[S.era][0]}`:`no one in ${curLabel()}`}` : `<b>${NAME(cc)}</b> · ${st.n} ${st.n===1?"person":"people"}<br>${MLBL()} ${MLBL()==="share"?(st.val*100).toFixed(1)+"%":fmt(st.val)} · RCA ${RCAF(st.rca)} · z ${ZF(st.z)}`;
+          tip.classList.add("on");
+          let x=ev.clientX-r.left-tip.offsetWidth-13, y=ev.clientY-r.top-tip.offsetHeight-13;
+          tip.style.left=Math.max(4,x)+"px"; tip.style.top=Math.max(4,y)+"px";
+        });
+        el.addEventListener("mouseleave",()=>tip.classList.remove("on"));
+      }
+      f2.appendChild(el);
+    }
+    ins.appendChild(f2);
+    ins.setAttribute("viewBox","768 586 130 118");
+    ins.style.display="block";
+    ins.parentElement.style.display="block";
+  }
+
+  // Caribbean inset — world view only
+  const ins2=$("inset2");
+  if(ins2&&GEO.car){
+    const GC=GEO.car;
+    ins2.innerHTML="";
+    // letterbox to the Levant inset's exact aspect so the two frames render identically
+    { const ar=130/118; let w=GC.w,h=GC.h,x=0,y=0;
+      if(w/h<ar){ const w2=h*ar; x=-(w2-w)/2; w=w2; } else { const h2=w/ar; y=-(h2-h)/2; h=h2; }
+      ins2.setAttribute("viewBox",`${x.toFixed(1)} ${y.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`); }
+    const f3=document.createDocumentFragment();
+    const carEntries=[];
+    for(const [cc,d] of Object.entries(GC.p)) carEntries.push([(remapG&&PMAP[cc])?PMAP[cc]:cc,d]);
+    for(const [cc,dstr] of carEntries){
+      const st=statFor(C,cc), ok=!hideDep(cc)&&st&&(S.min===0?st.n>0:st.n>=S.min);
+      const isZ2=!hideDep(cc)&&S.min===0&&st&&st.n===0;
+      const el=document.createElementNS("http://www.w3.org/2000/svg","path");
+      el.setAttribute("d",dstr);
+      if(ok) el.setAttribute("fill",color(st.val));
+      else if(isZ2) el.setAttribute("fill",color(0));
+      else el.setAttribute("fill","var(--line)");
+      let c2=((ok||isZ2)?"":"nodata ")+(S.sel===cc?"sel ":"");
+      if(c2.trim()) el.setAttribute("class",c2.trim());
+      if(ok||isZ2) el.addEventListener("click",()=>{S.sel=cc;render();});
+      f3.appendChild(el);
+    }
+    for(const [cc,ce] of Object.entries(GC.c||{})){
+      if(GC.p[cc]||hideDep(cc)) continue;
+      const st=statFor(C,cc), ok=st&&(S.min===0?st.n>0:st.n>=S.min);
+      const isZ2=S.min===0&&st&&st.n===0;
+      if(!ok&&!isZ2) continue;
+      const m=document.createElementNS("http://www.w3.org/2000/svg","circle");
+      m.setAttribute("cx",ce[0]); m.setAttribute("cy",ce[1]); m.setAttribute("r",24);
+      m.setAttribute("fill",ok?color(st.val):color(0));
+      m.setAttribute("stroke",S.sel===cc?"var(--map-sel)":"var(--surface)");
+      m.setAttribute("stroke-width",S.sel===cc?5:2.4);
+      m.style.cursor="pointer";
+      m.addEventListener("click",()=>{S.sel=cc;render();});
+      f3.appendChild(m);
+    }
+    ins2.appendChild(f3);
+    ins2.parentElement.style.display = S.view==="eur" ? "none" : "block";
+  }
+
+  // non-territorial groups
+  const gr=$("grouprow"); gr.innerHTML="";
+  const pbox=$("peoplesbox");
+  pbox.style.display = S.anc!=="origin" ? "" : "none";
+  if(S.anc!=="origin"){
+    let live=0;
+    for(const key of GROUPS.map(g=>g.code)){ const st=statFor(C,key); if(st&&st.n>0) live++; }
+    $("ppl-sum").textContent=`Peoples — ${live} groups`;
+    for(const key of GROUPS.map(g=>g.code)){
+      const st=statFor(C,key), ok=st&&(S.min===0?st.n>0:st.n>=S.min);
+      const b=document.createElement("button");
+      b.className="gtile"+(ok?"":" empty");
+      b.setAttribute("aria-pressed",S.sel===key?"true":"false");
+      if(ok){ b.style.background=color(st.val); b.style.color=textOn(st.val);
+              b.onclick=()=>{S.sel=key;render();}; }
+      b.innerHTML=`<b>${NAME(key)}</b><span>${ok?`${fmt(st.val)} \u00b7 ${st.n} ${st.n===1?"person":"people"}`:"no data here"}</span>`;
+      gr.appendChild(b);
+    }
+  }
+
+  // caution on nationally-defined categories
+  const wl=$("warn"); const lbl=(S.multi&&S.multi.length)?"":curLabel();
+  if(POOLED_ALL){
+    wl.classList.add("on");
+    wl.innerHTML="<b>RCA is switched off here.</b> With every domain pooled, a country's share of "
+      +"the selection equals its share of everything, so RCA is 1.00 for all 187 groups by definition "
+      +"and z is 0. Per capita and Share still work — they compare output against population and "
+      +"against the world total, not against the country's own baseline.";
+    $("th-rca").style.opacity=".4";
+  } else { $("th-rca").style.opacity=""; }
+  const natdef = !POOLED_ALL && (/^Literature/.test(lbl)||lbl==="History"||lbl==="Religion"||lbl==="Mythology"||lbl==="Geography");
+  if(!POOLED_ALL) wl.classList.toggle("on",natdef);
+  if(natdef) wl.innerHTML = lbl==="Geography"
+    ? "<b>Read with care.</b> Geography answerlines are places, so a country's score here largely restates its own geography."
+    : (lbl==="Religion"||lbl==="Mythology")
+    ? `<b>Read with care.</b> ${lbl} is geographically determined by content — Mesopotamian myth is Iraqi whoever studies it — so these numbers measure where a tradition originated, not who produced scholarship on it.`
+    : `<b>Read with care.</b> Quizbowl splits ${lbl==="History"?"history":"literature"} into national categories, so a country is over-represented in its own bucket by construction. Pooling removes the worst of it, but American sets still cover British ${lbl==="History"?"history":"literature"} more densely than French.`;
+
+  // ramp
+  const r=$("ramp"); r.innerHTML="";
+  const stops = S.metric==="share"
+    ? [0,.08,.18,.3,.44,.6,.78,1].map(t=>t*SCALEMAX)
+    : (S.min===0?[0]:[]).concat([0.05,0.17,0.3,0.55,0.78,1,1.3,1.9,3.5,7]);
+  stops.forEach(v=>{ const i=document.createElement("i"); i.style.background=color(v); r.appendChild(i); });
+  const zl=$("zero-key"); zl.style.display = S.min===0 ? "inline-flex" : "none";
+  const zs=document.getElementById("zero-swatch"); if(zs) zs.setAttribute("fill",color(0));
+  $("scale-lo").textContent=S.metric==="share"?"0%":"Under";
+  $("scale-hi").textContent=S.metric==="share"?`${(SCALEMAX*100).toFixed(0)}%`:"Over";
+
+  // ranking
+  const rows=[];
+  let universe=C.G.keys();
+  if(S.min===0){                       // include countries absent from this era entirely
+    const rf0=REGION[S.region]||REGION.all;
+    const u=new Set(C.G.keys());
+    for(const cc of Object.keys(GEO.wld.p)) if(cc!=="VA"&&popOf(cc)&&rf0(cc)) u.add(cc);
+    for(const cc of Object.keys(GEO.wld.c)) if(cc!=="VA"&&popOf(cc)&&rf0(cc)) u.add(cc);
+    universe=u;
+  }
+  for(const g of universe){
+    if(hideDep(g)) continue;
+    const st=statFor(C,g); if(st&&(S.min===0||st.n>=S.min)) rows.push([g,st]);
+  }
+  const K=S.sortK, dir=S.sortAsc?1:-1;
+  const gv=r=>K==="g"?r[0]:(K==="pop"?(r[1].pop??-1):(r[1][K]??-1e9));
+  rows.sort((a,b)=>{const x=gv(a),y=gv(b);
+    return (typeof x==="string"?x.localeCompare(y):x-y)*dir;});
+  $("r-note").textContent=rows.length
+    ? `— ${rows.length} with ≥${S.min} ${S.min===1?"person":"people"} in ${curLabel()}`
+    : `— nothing clears the ≥${S.min}-person threshold here; lower it or widen the era`;
+  [...$("rank-head").children].forEach(th=>{
+    th.classList.toggle("on",th.dataset.k===S.sortK);
+    th.classList.toggle("asc",th.dataset.k===S.sortK&&S.sortAsc);
+  });
+  const needle=(S.find||"").trim().toLowerCase();
+  const shown=needle?rows.filter(([g,st])=>g.toLowerCase().includes(needle)||NAME(g).toLowerCase().includes(needle)):rows;
+  const tb=$("rank"); tb.innerHTML="";
+  if(needle&&!shown.length) tb.innerHTML='<tr><td colspan="8" class="empty-note">Nothing matches \u201c'+needle+'\u201d at the current filters.</td></tr>';
+  for(const [g,st] of shown){
+    const tr=document.createElement("tr");
+    tr.setAttribute("aria-selected",S.sel===g?"true":"false");
+    if(GSET.has(g)) tr.classList.add("anc");
+    if(st.n<5) tr.classList.add("thinrow");
+    if(st.n===0) tr.classList.add("zerorow");
+    const pcCol=(st.percap??1)>=1?'var(--pos)':'var(--neg)';
+    const rcCol=st.rca>=1?'var(--pos)':'var(--neg)';
+    tr.innerHTML=`<td><b>${g}</b> <span style="color:var(--ink-3)">${NAME(g)===g?"":NAME(g)}</span>${GSET.has(g)?'<span class="ancmark">people</span>':""}${st.n===0?'<span class="thin">none</span>':st.n<5?`<span class="thin">n=${st.n}</span>`:""}${EST.has(g)?'<span class="est" title="population back-filled from documented historical estimates">est</span>':""}</td>
+      <td class="n mono" style="color:${pcCol};font-weight:640">${fmt(st.percap)}</td>
+      <td class="n mono" style="color:${rcCol}">${RCAF(st.rca)}</td>
+      <td class="n mono">${st.obs>=10?st.obs.toFixed(0):st.obs.toFixed(1)}</td>
+      <td class="n mono">${st.n}</td>
+      <td class="n mono">${st.pop?(st.pop>=1?st.pop.toFixed(1)+"M":(st.pop*1000).toFixed(0)+"k"):"—"}</td>
+      <td class="n mono">${ZF(st.z)}</td>
+      <td class="n mono">${(st.share*100).toFixed(1)}%</td>`;
+    tr.onclick=()=>{S.sel=g;render();};
+    tb.appendChild(tr);
+  }
+
+  // panel
+  const g=S.sel, st=g?statFor(C,g):null;
+  if(!g){
+    $("p-verdict").style.display="none"; $("p-metrics").style.display="none";
+    $("ptabs").style.display="none"; $("p-prof").style.display="none";
+    if(!S.globallist){
+      // default: no big list. Point the reader at the map and the search box.
+      $("p-who").textContent="Select a country";
+      $("p-what").textContent="Click any country or dot on the map, or search a person above. Turn on “global figure list” in Advanced to rank everyone here.";
+      $("p-figlbl").style.display="none"; $("p-figs").innerHTML="";
+      return;
+    }
+    // opt-in: a global frequency list across every country, each figure noting its origin.
+    const [wa0,wb0]=win();
+    $("p-who").textContent="Everyone";
+    $("p-what").textContent=`${curLabel()} · ${S.lo!==null?`born ${wa0}–${wb0}`:ERAS[S.era][0]} · all countries`;
+    $("p-figs").style.display="flex"; $("p-figlbl").style.display="block";
+    const seenP=new Set(), glob=[];
+    for(const [,mem] of C.members) for(const [i,w] of mem){ if(!seenP.has(i)){ seenP.add(i); glob.push([i,w]); } }
+    glob.sort((a,b)=>b[1]-a[1]);
+    const box=$("p-figs"); box.innerHTML="";
+    if(!glob.length){ box.innerHTML='<div class="empty-note">No figures match these filters.</div>'; return; }
+    let rk=0; for(const [i,w] of glob.slice(0,150)){ rk++; box.appendChild(figEl(i,w,rk,true)); }
+    return;
+  }
+  if(!st){
+    $("p-who").textContent=NAME(g);
+    $("p-what").textContent=`No one from ${NAME(g)} appears in ${SEL[S.field].label}${S.lo!==null||S.era?" in this period":""}.`;
+    $("p-verdict").style.display="none"; $("p-metrics").style.display="none";
+    $("p-figlbl").style.display="none"; $("p-figs").innerHTML="";
+    $("ptabs").style.display="none"; $("p-prof").style.display="none";
+    return;
+  }
+  if(S.view==="eur"&&!GEO.eur.p[g]&&!GSET.has(g)){
+    const wl2=$("warn"); wl2.classList.add("on");
+    wl2.innerHTML=`<b>${NAME(g)} is not on the Europe map.</b> Its numbers are in the ranking below; switch the map to World to see it.`;
+  }
+  $("p-who").innerHTML=NAME(g)+(GSET.has(g)?'<span class="ancmark">people</span>':"");
+  const [wa,wb]=win();
+  $("p-what").textContent=`${curLabel()} · ${S.lo!==null?`born ${wa}–${wb}`:ERAS[S.era][0]}`
+    + (st.absent?` · no ${NAME(g)} figure in any domain this era`:"");
+  const v=$("p-verdict"); v.style.display="inline-block";
+  const mv=st.val??st.rca, over=mv>=1.25, under=mv<=0.8, sig=st.z!=null&&Math.abs(st.z)>2;
+  v.textContent = st.absent ? `absent from the canon in ${ERAS[S.era][0]}`
+                 : st.n===0 ? `no one in ${curLabel()}`
+                 : !sig ? "at parity (not significant)" : over?`${MLBL()} ${fmt(mv)}× above par`
+                 : under?`${MLBL()} ${(1/mv).toFixed(1)}× below par` : "near parity";
+  v.style.background = (st.absent||!sig)?"var(--surface-2)":(over?"var(--sel-soft)":"var(--surface-2)");
+  v.style.color = (st.absent||!sig)?"var(--ink-3)":(over?"var(--pos)":"var(--neg)");
+  $("p-metrics").style.display="grid";
+  $("m-obs").textContent=st.obs>=10?st.obs.toFixed(0):st.obs.toFixed(1);
+  $("m-exp").textContent=st.exp.toFixed(1);
+  $("m-rca").textContent=RCAF(st.rca);
+  $("m-z").textContent=ZF(st.z);
+  $("m-pc").textContent=fmt(st.percap);
+  $("m-pop").textContent=st.pop?(st.pop>=1?st.pop.toFixed(1)+"M":(st.pop*1000).toFixed(0)+"k"):"—";
+
+  $("ptabs").style.display="flex";
+  [...$("ptabs").children].forEach(b=>b.setAttribute("aria-pressed",b.dataset.t===S.tab?"true":"false"));
+  if(S.tab==="prof"){
+    $("p-figlbl").style.display="none"; $("p-figs").style.display="none";
+    $("p-prof").style.display="block"; renderProfile(g); return;
+  }
+  $("p-prof").style.display="none"; $("p-figs").style.display="flex";
+  $("p-figlbl").style.display="block";
+  const list=(C.members.get(g)||[]).slice().sort((a,b)=>b[1]-a[1]);
+  const box=$("p-figs"); box.innerHTML="";
+  if(!list.length){ box.innerHTML='<div class="empty-note">No figures match these filters.</div>'; return; }
+  let rank=0;
+  for(const [i,w] of list){ rank++; box.appendChild(figEl(i,w,rank,false)); }
+}
+function figEl(i,w,rank,withCountry){
+  const p=P[i];
+  const el=document.createElement("div");
+  el.className="fig"; el.dataset.pi=i;
+  const dd=p[15]===-1?"–":(p[15]===null||p[15]===undefined?"":"–"+p[15]);
+  const hasB=p[4]!==null&&p[4]!==undefined;
+  // no "?" placeholder: an unknown birth year shows nothing (or "d. 1970" when only the death is known)
+  const bits=hasB ? [p[4]+dd] : ((p[15]!==null&&p[15]!==undefined&&p[15]!==-1) ? ["d. "+p[15]] : []);
+  // the description gets its own line under the facts; a quizbowl last line is quoted verbatim
+  const _d=(p[17]||"").trim();
+  // quoted lines arrive with their quotes; a plain descriptor gets its first LETTER capitalized ('"Tory radical"' -> '"Tory radical"', 'ancient Greek poet' -> 'Ancient Greek poet')
+  let desc="";
+  if(_d && _d!==p[0].trim()){
+    if(_d.startsWith("\u201C")) desc=_d;                                   // verbatim quote: leave alone
+    else {
+      desc=_d.replace(/^([^\p{L}]*)(\p{Ll})/u,(m,a,b)=>a+b.toUpperCase());   // the demonym stays: it is the honest one-line description
+    }
+  }
+  // (no "low confidence" chip on cards: it flagged 12k figures and told the reader nothing; the Advanced filter still exists)
+  if(p[19]) bits.push('<span class="lcmark" title="not a historical person; counted only as a subject of the canon, never as a practitioner">legendary / fictional</span>');
+  // extras: never the demonym (you are already looking at the country; peoples have their own chip),
+  // the birth polity only when it adds history ("Electorate of Bavaria", not "United Kingdom" under GB)
+  const seen=(p[17]||"").toLowerCase(), cnameD=String(NAME(p[1])||""), cname=cnameD.toLowerCase();
+  if(p[6] && !seen.includes(String(p[6]).toLowerCase())) bits.push(p[6]);   // medium ("painter"), unless the descriptor says it
+  // EVERY card carries one country entry, so the line reads the same for everyone (Stevie, Sep 11 2026):
+  // a historical polity ("Kingdom of France", "Emirate of Nejd") in full colour; the bare modern country
+  // name dimmed, whether it came as the polity or is the fallback when no polity is recorded.
+  { const pol=String(p[10]||"").trim();
+    if(pol && pol.toLowerCase()!==cname) bits.push(pol);
+    else if(cnameD) bits.push('<span class="polhome">'+(pol||cnameD)+'</span>'); }
+  // "subject" tag: only when the person is NOT a practitioner in ANY selected field (a pooled domain
+  // like "All social science" must not read Acemoglu's role from Anthropology when he practices Economics)
+  const _k0=SEL[S.field]&&SEL[S.field].ix[0];
+  const _selix=new Set(SEL[S.field]?SEL[S.field].ix:[]);
+  const _rmk=p[18]||{};
+  let _pract=false, _seen=false;
+  for(const fi of _selix){ const rv=_rmk[fi]||_rmk[String(fi)]; if(rv){ _seen=true; if(rv==="p") _pract=true; } }
+  if(p[22]!=null && _selix.has(p[22]) && (_rmk[p[22]]||_rmk[String(p[22])])==="p") _pract=true;
+  if(_seen && !_pract) bits.push("subject");   // practitioner is the default and adds nothing
+  // every other field a practitioner works in is listed formally, even when the descriptor already implies it (Stevie)
+  const others=POOLED_ALL?[]:(p[9]||[]).filter(fi=>fi!==_k0).map(fi=>disp(F[fi]));
+  if(others.length) bits.push('<span class="alsofld" title="this person also works in these fields">also '+others.join(", ")+'</span>');
+  const wtxt=String(w<1?1:Math.round(w));   // whole figures only; a sub-1 share rounds up to 1, never 0
+  const right = withCountry
+    ? `<div class="ocol"><span class="ofrom">${NAME(p[1])}</span><span class="freq mono">${wtxt}</span></div>`
+    : `<div class="freq mono">${wtxt}</div>`;
+  // a fictional character inherits its author's peoples for counting, but the chip is the author's, not the character's: hide it
+  el.innerHTML=`<span class="rank">#${rank}</span><div class="nm">${p[0]}${(p[19]?[]:(p[20]||[])).map(g=>'<span class="jew">'+CHIP(g)+'</span>').join("")}</div>
+    ${right}
+    <div class="meta">${bits.join(" · ")}</div>${desc?`<div class="desc${desc.startsWith("\u201C")?" qb":""}">${desc.startsWith("\u201C")?desc.replace(/^\u201C|\u201D$/g,""):desc}</div>`:""}`;   // quote marks stay in the data, not on the card
+  return el;
+}
+
+// controls
+const fs=$("f-field");
+const FAMILY=(o)=>{
+  if(o.agg||o.label==="Everything pooled") return "Pooled";
+  const f=F[o.ix[0]];
+  if(/^(Physics|Chemistry|Biology|Engineering|Misc Science)$|^Other Science/.test(f)) return "Sciences";
+  if(/^Literature \//.test(f)) return "Literature";
+  if(/^(Auditory Fine Arts|Visual Fine Arts|Misc Arts)$|^Other Fine Arts/.test(f)) return "Fine arts";
+  if(/^Social Science|^Misc Social Science$/.test(f)) return "Social science";
+  if(/^(History|Philosophy|Religion|Mythology|Geography|Other Academic|Current Events)$/.test(f)) return "Humanities";
+  return "Pop culture";
+};
+const FAMORDER=["Pooled","Humanities","Literature","Sciences","Fine arts","Social science","Pop culture"];
+function fillFields(){
+  const prev=SEL[S.field]&&SEL[S.field].label;
+  buildSel();
+  let k=SEL.findIndex(o=>o.label===prev);
+  if(k<0) k=Math.max(0,SEL.findIndex(o=>o.label==="Auditory Fine Arts"));
+  S.field=k; fs.value=SEL[k]?SEL[k].label:"";
+}
+buildSel(); S.field=Math.max(0,SEL.findIndex(o=>o.label==="Auditory Fine Arts")); fillFields();
+(function(){
+  if(!/claude\.ai$/.test(location.hostname)) { const pl=$("playlink"); if(pl) pl.style.display=""; }
+  const hSel=HASHP.get("sel"), hDom=HASHP.get("domain"), hEra=HASHP.get("era");
+  if(hDom){ const k=SEL.findIndex(o=>o.label.toLowerCase()===hDom.toLowerCase()); if(k>=0){ S.field=k; fs.value=SEL[k].label; } }
+  if(hEra){ const e=ERAS.findIndex(x=>x[0].toLowerCase()===hEra.toLowerCase()); if(e>=0) S.era=e; }
+  if(hSel) S.sel=hSel.toUpperCase();
+})();
+(function(){
+  const inp=fs, menu=$("f-field-menu"); let hi=-1, items=[];
+  function build(filter){
+    const nq=(filter||"").trim().toLowerCase();
+    const buckets=new Map(FAMORDER.map(k=>[k,[]]));
+    SEL.forEach((o,i)=>{ if(!nq||o.label.toLowerCase().includes(nq)) buckets.get(FAMILY(o)).push([o,i]); });
+    let html=""; items=[];
+    for(const fam of FAMORDER){ const rows=buckets.get(fam); if(!rows.length) continue;
+      html+='<div class="grp">'+fam+'</div>';
+      for(const [o,i] of rows){ const k=items.length; items.push(i);
+        html+='<div class="opt'+(i===S.field?' cur':'')+'" data-k="'+k+'" data-i="'+i+'">'+o.label+'</div>'; } }
+    if(!items.length) html='<div class="opt" style="color:var(--ink-3)">no domain matches</div>';
+    menu.innerHTML=html;
+    hi=items.indexOf(S.field); if(hi<0) hi=items.length?0:-1; paint();
+    [...menu.querySelectorAll(".opt[data-i]")].forEach(el=>el.onmousedown=e=>{ e.preventDefault(); choose(+el.dataset.i); });
+  }
+  function paint(){ [...menu.querySelectorAll(".opt")].forEach(el=>el.classList.toggle("hi", el.dataset.k!=null && +el.dataset.k===hi)); }
+  function ensure(){ const el=menu.querySelector('.opt[data-k="'+hi+'"]'); if(el) el.scrollIntoView({block:"nearest"}); }
+  function place(){
+    const r=inp.getBoundingClientRect();
+    menu.style.left=r.left+"px"; menu.style.width=r.width+"px";
+    const below=window.innerHeight-r.bottom;
+    if(below<220 && r.top>below){ menu.style.top="auto"; menu.style.bottom=(window.innerHeight-r.top)+"px"; menu.style.maxHeight=Math.min(r.top-8,420)+"px"; }
+    else { menu.style.bottom="auto"; menu.style.top=r.bottom+"px"; menu.style.maxHeight=Math.min(below-8,420)+"px"; }
+  }
+  function openM(){ build(""); inp.select&&inp.select(); menu.classList.add("on"); place(); }
+  function closeM(){ menu.classList.remove("on"); inp.value=SEL[S.field]?SEL[S.field].label:""; }
+  function choose(i){ S.field=i; inp.value=SEL[i].label; menu.classList.remove("on"); render(); }
+  inp.addEventListener("focus",openM);
+  inp.addEventListener("input",()=>{ build(inp.value); menu.classList.add("on"); place(); });
+  window.addEventListener("resize",()=>{ if(menu.classList.contains("on")) place(); });
+  window.addEventListener("scroll",()=>{ if(menu.classList.contains("on")) place(); },true);
+  inp.addEventListener("keydown",e=>{
+    if(e.key==="ArrowDown"){ e.preventDefault(); if(items.length){ hi=(hi+1)%items.length; ensure(); paint(); } }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); if(items.length){ hi=(hi-1+items.length)%items.length; ensure(); paint(); } }
+    else if(e.key==="Enter"){ e.preventDefault(); if(hi>=0&&items[hi]!=null) choose(items[hi]); }
+    else if(e.key==="Escape"){ closeM(); inp.blur(); }
+  });
+  document.addEventListener("click",e=>{ if(!e.target.closest("#f-field-combo")) closeM(); });
+})();
+const es=$("f-era");
+ERAS.forEach((e,i)=>{
+  const b=document.createElement("button"); b.textContent=e[0];
+  b.setAttribute("aria-pressed",i===0?"true":"false");
+  b.onclick=()=>{S.era=i;clearCustom();[...es.children].forEach((c,j)=>c.setAttribute("aria-pressed",j===i?"true":"false"));render();};
+  es.appendChild(b);
+});
+function seg(id,key,attr){
+  const el=$(id);
+  if(!el) return;
+  [...el.children].forEach(b=>b.onclick=()=>{
+    S[key]=b.dataset[attr];
+    [...el.children].forEach(c=>c.setAttribute("aria-pressed",c===b?"true":"false"));
+    render();
+  });
+}
+seg("f-basis","basis","b"); seg("f-view","view","v");
+[...$("ptabs").children].forEach(b=>{b.onclick=()=>{S.tab=b.dataset.t;render();};});
+(function(){
+  const ms=$("f-multi");
+  F.map((f,i)=>[disp(f),i]).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([lab,i])=>{
+    const o=document.createElement("option"); o.value=i; o.textContent=lab; ms.appendChild(o);
+  });
+  ms.onchange=()=>{
+    const v=[...ms.selectedOptions].map(o=>+o.value);
+    S.multi=v.length?v:null; render();
+  };
+  $("f-multiclear").onclick=()=>{[...ms.options].forEach(o=>o.selected=false);S.multi=null;render();};
+  $("f-region").onchange=e=>{S.region=e.target.value;render();};
+  $("f-reset").onclick=()=>{ try{sessionStorage.removeItem("atlas");}catch(e){} location.reload(); };
+  $("f-find").addEventListener("input",e=>{S.find=e.target.value;render();});
+  fs.addEventListener("change",()=>{ if(S.multi){S.multi=null;[...ms.options].forEach(o=>o.selected=false);} });
+})();
+seg("f-metric","metric","m"); seg("f-dual","dual","d"); seg("f-erabasis","erabasis","e");
+$("f-lens").onchange=e=>{S.lens=e.target.checked;render();};
+  $("f-inferred").onchange=e=>{S.inferred=e.target.checked;render();};
+seg("f-anc","anc","a");
+(function(){const el=$("f-anc");[...el.children].forEach(b=>{const o=b.onclick;
+  b.onclick=()=>{if(b.dataset.a==="origin"&&GSET.has(S.sel))S.sel=null;o();};});})();
+[...$("rank-head").children].forEach(th=>{
+  th.onclick=()=>{const k=th.dataset.k;
+    if(S.sortK===k) S.sortAsc=!S.sortAsc; else {S.sortK=k;S.sortAsc=(k==="g");}
+    render();};
+});
+function clearCustom(){S.lo=S.hi=null;$("f-lo").value="";$("f-hi").value="";}
+$("f-apply").onclick=()=>{
+  let a=parseInt($("f-lo").value,10), b=parseInt($("f-hi").value,10);
+  if(isNaN(a)&&isNaN(b)) return;              // both blank: nothing to apply
+  if(isNaN(a)) a=-9999;                       // blank start: all the way into the deep past
+  if(isNaN(b)) b=NOW;                          // blank end: up to the present
+  if(b<a) return;
+  S.lo=a;S.hi=b;[...es.children].forEach(c=>c.setAttribute("aria-pressed","false"));render();
+};
+$("f-lo").addEventListener("keydown",e=>{if(e.key==="Enter")$("f-apply").click();});
+$("f-hi").addEventListener("keydown",e=>{if(e.key==="Enter")$("f-apply").click();});
+$("f-conf").onchange=e=>{S.conf=e.target.checked;render();};
+$("f-mentiononly").onchange=e=>{S.mentonly=e.target.checked;render();};
+$("f-fictional").onchange=e=>{S.fict=e.target.checked;render();};
+$("f-deps").onchange=e=>{S.deps=e.target.checked;render();};
+$("f-globallist").onchange=e=>{S.globallist=e.target.checked;render();};
+$("f-min").oninput=e=>{S.min=+e.target.value;render();};
+let REC=null, RECSORT="share", RECKEY="";
+function recKey(){ return JSON.stringify([S.anc,S.role,S.basis,S.dual,S.region,S.conf,S.mentonly,S.fict,S.deps,S.inferred,S.fieldbasis,S.erabasis]); }
+function computeRecords(){                 // synchronous path for tests; UI uses the async version
+  if(REC && RECKEY===recKey()) return REC;
+  const jobs=recordJobs(); const rows=[];
+  for(const j of jobs) recordStep(j,rows);
+  REC=rows; RECKEY=recKey(); return rows;
+}
+function recordJobs(){
+  const jobs=[];
+  for(let i=0;i<SEL.length;i++){
+    const o=SEL[i];
+    if(o.label==="Everything pooled"||o.label.startsWith("All ")) continue;
+    for(let e=1;e<ERAS.length;e++) jobs.push({i,e,label:o.label});
+  }
+  return jobs;
+}
+function recordStep(j,rows){
+  const saveF=S.field, saveE=S.era, saveLo=S.lo, saveHi=S.hi;
+  S.field=j.i; S.era=j.e; S.lo=null; S.hi=null;
+  const C=compute();
+  for(const g of C.G.keys()){
+    if(hideDep(g)) continue;
+    const st=statFor(C,g);
+    if(!st||st.n<8||st.obs<40) continue;
+    let top="", tw=0;
+    for(const [pi,w] of (C.members.get(g)||[])) if(w>tw){ tw=w; top=P[pi][0]; }
+    rows.push({g,fi:j.i,f:j.label,e:j.e,era:ERAS[j.e][0],share:st.share,z:st.z,percap:st.percap,
+               n:st.n,obs:st.obs,top});
+  }
+  S.field=saveF; S.era=saveE; S.lo=saveLo; S.hi=saveHi;
+}
+function computeRecordsAsync(done){
+  if(REC && RECKEY===recKey()) return done(REC);
+  const jobs=recordJobs(), rows=[]; let k=0;
+  (function slice(){
+    const t0=performance.now();
+    while(k<jobs.length && performance.now()-t0<40) recordStep(jobs[k++],rows);
+    if(k<jobs.length){
+      $("recbody").innerHTML=`<div class="empty-note">scanning ${jobs[k].label} \u00b7 ${ERAS[jobs[k].e][0]} \u2014 ${Math.round(100*k/jobs.length)}%</div>`;
+      setTimeout(slice,0);
+    } else { REC=rows; RECKEY=recKey(); done(rows); }
+  })();
+}
+function renderRecords(){
+  computeRecordsAsync(res=>renderRecordsRows([...res]));
+}
+function renderRecordsRows(rows){
+  const k=RECSORT;
+  rows.sort((a,b)=>((b[k]??-1e9)-(a[k]??-1e9)));
+  const top=rows.slice(0,80);
+  if(!top.length){ $("recbody").innerHTML='<div class="empty-note">nothing qualifies under the current filters</div>'; return; }
+  $("recbody").innerHTML='<table><thead><tr><th>#</th><th>who</th><th>field</th><th>era</th>'+
+    '<th class="n">share</th><th class="n">z</th><th class="n">per cap</th><th class="n">people</th><th>defining figure</th></tr></thead><tbody>'+
+    top.map((r,ix)=>`<tr data-ri="${ix}" style="cursor:pointer">
+      <td class="n mono">${ix+1}</td>
+      <td><b>${NAME(r.g)}</b>${GSET.has(r.g)?'<span class="ancmark">people</span>':""}</td>
+      <td>${r.f}</td><td>${r.era}</td>
+      <td class="n mono" style="color:var(--pos);font-weight:640">${(r.share*100).toFixed(1)}%</td>
+      <td class="n mono">${ZF(r.z)}</td>
+      <td class="n mono">${r.percap==null?"\u2014":fmt(r.percap)}</td>
+      <td class="n mono">${r.n}</td>
+      <td style="color:var(--ink-2)">${r.top}</td></tr>`).join("")+"</tbody></table>";
+  window.__recTop=top;
+  for(const tr of $("recbody").querySelectorAll("tr[data-ri]")){
+    tr.onclick=()=>{ const r=window.__recTop[+tr.dataset.ri];
+      S.field=r.fi; fs.value=SEL[r.fi].label; S.era=r.e; S.lo=null; S.hi=null; S.sel=r.g;
+      $("records").classList.remove("on"); $("recbtn").setAttribute("aria-expanded","false");
+      render(); };
+  }
+}
+$("recbtn").onclick=()=>{
+  const d=$("records"), on=d.classList.toggle("on");
+  $("recbtn").setAttribute("aria-expanded",on?"true":"false");
+  if(on){ renderRecords();
+    d.scrollIntoView({behavior:"smooth",block:"nearest"}); }
+};
+$("recbtn").setAttribute("aria-expanded","false");
+(function(){ const el=$("recsort");
+  [...el.children].forEach(b=>b.onclick=()=>{
+    RECSORT=b.dataset.rs;
+    [...el.children].forEach(c=>c.setAttribute("aria-pressed",c===b?"true":"false"));
+    renderRecords();
+  });})();
+$("apibtn").onclick=()=>{
+  const d=$("docs"), on=d.classList.toggle("on");
+  $("apibtn").setAttribute("aria-expanded",on?"true":"false");
+  if(on) d.scrollIntoView({behavior:"smooth",block:"nearest"});
+};
+$("apibtn").setAttribute("aria-expanded","false");
+matchMedia("(prefers-color-scheme:dark)").addEventListener("change",render);
+
+// ---- person search ----
+(function(){
+  const IN=$("psearch-in"), MENU=$("psearch-menu");
+  if(!IN) return;
+  const norm=x=>x.normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase();
+  // precompute a light index: [normName, personIndex, weight]
+  const IDX=P.map((p,i)=>[norm(p[0]),i,p[8]?p[8].reduce((a,b)=>a+b[1],0):0]);
+  let results=[], hi=-1;
+  function selIndexFor(fieldIdx){
+    for(let i=0;i<SEL.length;i++) if(!SEL[i].agg&&SEL[i].ix.length===1&&SEL[i].ix[0]===fieldIdx) return i;
+    return SEL.findIndex(o=>o.label==="Everything pooled");
+  }
+  function jump(i){
+    const p=P[i];
+    const fi=(p[9]&&p[9].length)?p[9][0]:null;
+    if(fi!=null){ const k=selIndexFor(fi); if(k>=0){ S.field=k; fs.value=SEL[k].label; } }
+    S.era=0; S.lo=null; S.hi=null; S.sel=p[1]; S.min=0;
+    close();
+    render();
+    flash(i,p);
+  }
+  function flash(i,p){
+    let card=$("p-figs").querySelector('.fig[data-pi="'+i+'"]');
+    if(!card && S.role!=="all"){ S.role="all"; syncControls&&syncControls(); render(); card=$("p-figs").querySelector('.fig[data-pi="'+i+'"]'); }
+    if(card){ card.classList.add("flash"); card.scrollIntoView({behavior:"smooth",block:"center"});
+      setTimeout(()=>card.classList.remove("flash"),1700); }
+    else { const wl=$("warn"); if(wl){ wl.classList.add("on");
+      wl.innerHTML='<b>'+esc(p[0])+'</b> is '+(NAME(p[1])||p[1])+', '+(p[17]||'in the canon')+
+        '. Not shown in the current cell — try Both roles or widen the filters.'; } }
+  }
+  function render_results(q){
+    const nq=norm(q.trim());
+    if(nq.length<2){ MENU.classList.remove("on"); results=[]; return; }
+    const starts=[], has=[];
+    for(const [nm,i,w] of IDX){
+      const at=nm.indexOf(nq);
+      if(at===0) starts.push([i,w]);
+      else if(at>0) has.push([i,w]);
+      if(starts.length>60) break;
+    }
+    starts.sort((a,b)=>b[1]-a[1]); has.sort((a,b)=>b[1]-a[1]);
+    results=starts.concat(has).slice(0,12);
+    hi=results.length?0:-1;
+    if(!results.length){ MENU.innerHTML='<div class="pres sub">no one by that name</div>'; MENU.classList.add("on"); return; }
+    MENU.innerHTML=results.map(([i,w],k)=>{
+      const p=P[i]; const disc=(p[9]&&p[9].length)?disp(F[p[9][0]]):"—";
+      return '<div class="pres'+(k===hi?" hi":"")+'" data-k="'+k+'">'+
+        '<b>'+esc(p[0])+'</b> <span class="sub">'+(NAME(p[1])||p[1])+' · '+esc(disc)+' · '+Math.round(w)+'</span></div>';
+    }).join("");
+    MENU.classList.add("on");
+    [...MENU.querySelectorAll(".pres[data-k]")].forEach(el=>{
+      el.onmousedown=e=>{ e.preventDefault(); jump(results[+el.dataset.k][0]); };
+    });
+  }
+  function close(){ MENU.classList.remove("on"); }
+  IN.addEventListener("input",()=>render_results(IN.value));
+  IN.addEventListener("focus",()=>{ if(results.length) MENU.classList.add("on"); });
+  IN.addEventListener("keydown",e=>{
+    if(!results.length) return;
+    if(e.key==="ArrowDown"){ e.preventDefault(); hi=(hi+1)%results.length; paintHi(); }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); hi=(hi-1+results.length)%results.length; paintHi(); }
+    else if(e.key==="Enter"){ e.preventDefault(); if(hi>=0) jump(results[hi][0]); }
+    else if(e.key==="Escape"){ close(); IN.blur(); }
+  });
+  function paintHi(){ [...MENU.querySelectorAll(".pres")].forEach((el,k)=>el.classList.toggle("hi",k===hi)); }
+  document.addEventListener("click",e=>{ if(!e.target.closest(".psearch")) close(); });
+})();
+
+try{
+  const saved=JSON.parse(sessionStorage.getItem("atlas")||"null");
+  if(saved&&typeof saved==="object"&&saved._v===STATE_V){
+    for(const k of ["era","lo","hi","metric","tab","sortK","sortAsc","basis",
+                    "dual","anc","erabasis","fieldbasis","inferred","role","region","multi","conf","min","view","sel"])
+      if(k in saved) S[k]=saved[k];
+    buildSel(); fillFields();
+    if(typeof saved.field==="number"&&SEL[saved.field]) S.field=saved.field;
+  }
+}catch(e){}
+if(S.sel===null||S.sel===undefined) S.sel="NL";
+render();
+
+// --- look under the hood: click a figure -> its verbatim canon mentions -------
+(function(){
+  const back=$("mback"), pan=$("mpanel"), body=$("mpbody"),
+        titl=$("mptitle"), sub=$("mpsub"), xb=$("mpclose");
+  function closeP(){ back.classList.remove("on"); pan.classList.remove("on"); pan.setAttribute("aria-hidden","true"); }
+  function order(a,b){ return (FLD_RANK(a)-FLD_RANK(b))||a.localeCompare(b); }
+  function FLD_RANK(f){ const i=F.indexOf(f); return i<0?999:i; }
+  async function openP(i){
+    const p=P[i]; if(!p) return;
+    const yr=(p[4]===null||p[4]===undefined)?"None":p[4];
+    const key=p[0]+"|"+yr;
+    const home=(p[22]!=null)?F[p[22]]:null;
+    titl.textContent=p[0];
+    sub.textContent=(NAME(p[1])||p[1])+(home?" · home: "+disp(home):"");
+    body.innerHTML='<div class="muted">Loading mentions…</div>';
+    back.classList.add("on"); pan.classList.add("on"); pan.setAttribute("aria-hidden","false");
+    let d;
+    try{ d=await (await fetch("/api/mentions?key="+encodeURIComponent(key))).json(); }
+    catch(e){ body.innerHTML='<div class="muted">Could not load mentions.</div>'; return; }
+    const fields=(d&&d.fields)||{};
+    const names=Object.keys(fields).filter(f=>fields[f].length).sort(order);
+    if(!names.length){ body.innerHTML='<div class="muted">No verbatim questions are on file for this figure. Its canon count comes from passing phrase mentions rather than full answerlines, which aren’t captured here.</div>'; return; }
+    const chunks=[];
+    for(const f of names){
+      const items=fields[f];
+      const rows=items.map(q=>{
+        const src=[q.set,q.kind].filter(Boolean).join(" · ");
+        return '<div class="mpq">'+esc(q.text)+'<span class="src">'+esc(src)+'</span></div>';
+      }).join("");
+      const cap=items.length>=40?"40+":String(items.length);
+      chunks.push('<div class="mpfld"><h4>'+esc(disp(f))+(f===home?' <span class="n">home</span>':'')+
+        ' <span class="n">'+cap+' question'+(items.length===1?'':'s')+'</span></h4>'+rows+'</div>');
+    }
+    body.innerHTML=chunks.join("");
+    body.scrollTop=0;
+  }
+  document.addEventListener("click",e=>{
+    const card=e.target.closest(".fig[data-pi]");
+    if(card){ openP(+card.dataset.pi); }
+  });
+  xb.onclick=closeP;
+  back.onclick=closeP;
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&pan.classList.contains("on")) closeP(); });
+})();
+</script>
