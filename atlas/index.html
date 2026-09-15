@@ -460,7 +460,7 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
       <div class="ctl">
         <span class="lbl">Combine domains</span>
         <select id="f-multi" multiple size="9"></select>
-        <div class="hint">Cmd/Ctrl-click to pool several. <button type="button" id="f-multiclear">clear</button></div>
+        <div class="hint">Click to toggle; pooled domains combine. <button type="button" id="f-multiclear">clear</button></div>
       </div>
       <div class="ctl">
         <span class="lbl">Lens</span>
@@ -1578,6 +1578,11 @@ seg("f-basis","basis","b"); seg("f-view","view","v");
     const v=[...ms.selectedOptions].map(o=>+o.value);
     S.multi=v.length?v:null; render();
   };
+  // a plain click toggles one entry without clearing the others (no Cmd/Ctrl needed); keyboard selection is untouched
+  ms.addEventListener("mousedown",e=>{
+    const o=e.target.closest&&e.target.closest("option"); if(!o||e.metaKey||e.ctrlKey||e.shiftKey) return;
+    e.preventDefault(); const top=ms.scrollTop; o.selected=!o.selected; ms.scrollTop=top; ms.focus({preventScroll:true}); ms.onchange();
+  });
   $("f-multiclear").onclick=()=>{[...ms.options].forEach(o=>o.selected=false);S.multi=null;render();};
   $("f-region").onchange=e=>{S.region=e.target.value;render();};
   $("f-reset").onclick=()=>{ try{sessionStorage.removeItem("atlas");}catch(e){} location.reload(); };
