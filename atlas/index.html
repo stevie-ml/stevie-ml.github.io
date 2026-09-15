@@ -613,21 +613,25 @@ function disp(f){
 }
 const AGG=[
   ["Movies / Film",["Movies","Other Fine Arts / Film"]],
-  ["All music",["Music","Auditory Fine Arts"]],
+  ["Music",["Music","Auditory Fine Arts"]],
   ["Literature",["Literature","Literature / Poetry","Literature / Drama",
     "Literature / Long Fiction","Literature / Short Fiction","Literature / Misc"]],
-  ["All sciences",["Physics","Chemistry","Biology","Other Science / Astronomy",
+  ["Sciences",["Physics","Chemistry","Biology","Other Science / Astronomy",
     "Other Science / Computer Science","Other Science / Earth Science","Other Science / Math","Misc Science"]],
-  ["All fine arts",["Auditory Fine Arts","Visual Fine Arts","Other Fine Arts / Architecture",
+  ["Fine arts",["Auditory Fine Arts","Visual Fine Arts","Other Fine Arts / Architecture",
     "Other Fine Arts / Dance","Other Fine Arts / Film","Other Fine Arts / Jazz",
     "Misc Arts","Other Fine Arts / Opera","Other Fine Arts / Photography"]],
-  ["All social science",["Social Science / Anthropology","Social Science / Economics",
+  ["Social science",["Social Science / Anthropology","Social Science / Economics",
     "Social Science / Linguistics","Social Science / Psychology","Social Science / Sociology",
     "Misc Social Science"]],
-  ["All thought",["Philosophy","Religion","Social Science / Economics","Social Science / Sociology",
+  ["Thought",["Philosophy","Religion","Social Science / Economics","Social Science / Sociology",
     "Social Science / Anthropology","Social Science / Psychology","Social Science / Linguistics",
     "Misc Social Science","Other Academic"]],
-  ["All pop culture",["Movies","Music","Sports","Television","Video Games","Misc Pop Culture"]],
+  ["Culture",["Movies","Other Fine Arts / Film","Music","Auditory Fine Arts","Visual Fine Arts",
+    "Other Fine Arts / Architecture","Other Fine Arts / Dance","Other Fine Arts / Jazz","Misc Arts",
+    "Other Fine Arts / Opera","Other Fine Arts / Photography","Musicals","Television","Video Games",
+    "Sports","Misc Pop Culture","Literature","Literature / Poetry","Literature / Drama",
+    "Literature / Long Fiction","Literature / Short Fiction","Literature / Misc"]],
 ];
 // unified selector: aggregates first, then individual fields
 let SEL=[];
@@ -637,7 +641,7 @@ function buildSel(){
     const ix=names.map(n=>F.indexOf(n)).filter(i=>i>=0);
     if(ix.length>1) SEL.push({label:lbl,ix,agg:true});
   }
-  const COMBINED=new Set(["Movies","Other Fine Arts / Film","Literature"]); // shown only pooled
+  const COMBINED=new Set(["Movies","Other Fine Arts / Film","Literature","Music"]); // shown only pooled
   const singles=F.map((f,i)=>({label:disp(f),ix:[i],agg:false}))
                  .filter(o=>!COMBINED.has(F[o.ix[0]]))
                  .sort((a,b)=>a.label.localeCompare(b.label));
@@ -766,7 +770,18 @@ const GEOG=F.indexOf("Geography");
 // rolemap (p[18]) tags each person practitioner "p" vs subject "s" PER FIELD — the reliable signal for
 // historians/geographers. (Discipline p[9] merely says the person appears in the field, so it leaks
 // subjects like Charles V into the History "chroniclers" lens and Mungo Park into Geography.)
-const isPract=(i,fi)=>((P[i][18]||{})[fi]==="p");
+// The rolemap has some false negatives (Halil İnalcık, "Turkish historian", was tagged subject), so we
+// ALSO rescue anyone whose description is a plain role-bio naming the profession. Quizbowl-clue
+// descriptions (wrapped in “ ” or starting "Name this") mention historians about OTHER people
+// ("patronised the chronicler"), so they are excluded — that keeps subjects like Attila out.
+const CHRON_RE=/\b(historian|historiographer|chronicler|annalist|antiquarian|journalist|reporter|correspondent|columnist)\b/i;
+const GEO_RE=/\b(geographer|cartographer)\b/i;
+const isClueDesc=d=>{d=(d||"").trim();return d.startsWith("“")||d.startsWith('"')||/^(Name|Give|Identify) this/.test(d);};
+function isPractRole(i,fi,re){
+  if((P[i][18]||{})[fi]==="p") return true;              // rolemap practitioner
+  const d=P[i][17]||"";                                   // else a plain (non-clue) role description
+  return re.test(d) && !isClueDesc(d);
+}
 // Narrative disciplines are FAMILIES: the pipeline collapses an author's discipline to one dominant genre
 // ("Misc Literature" for Goethe), but a novelist-dramatist-poet is a creator in every Literature genre he
 // carries weight in. Without this, Goethe (457 Literature) showed 114 and sat below Brecht (Sep 14 2026).
@@ -786,10 +801,10 @@ function memberW(i,fi,n,lens){
   if(n<=0) return 0;
   const k=KIND[fi], pr=P_DISC[i].has(fi), fic=!!P[i][19], topf=(P[i][8].length?P[i][8][0][0]:-1);
   if(k==="narrative") return lens==="alt" ? (fic?n:0) : ((narrPr(i,fi)&&!fic)?n:0);
-  if(k==="chronicle"){ const hp=isPract(i,fi); return lens==="alt" ? (hp?n:0) : (!hp?n:0); } // chroniclers = rolemap practitioners; subjects (Charles V) stay in the default figures view
+  if(k==="chronicle"){ const hp=isPractRole(i,fi,CHRON_RE); return lens==="alt" ? (hp?n:0) : (!hp?n:0); } // chroniclers = rolemap practitioners or plain role-bios; subjects (Charles V) stay in the default figures view
   if(k==="mythology") return (fic||FOLK.has(P[i][0]))?n:0;
   if(k==="religion")  return (!fic && (pr || fi===topf))?n:0;
-  if(fi===GEOG){ const gp=isPract(i,fi); return lens==="alt" ? (!gp?n:0) : (gp?n:0); } // geographers = rolemap practitioners; explorers/subjects (Mungo Park) drop to the alt lens
+  if(fi===GEOG){ const gp=isPractRole(i,fi,GEO_RE); return lens==="alt" ? (!gp?n:0) : (gp?n:0); } // geographers = rolemap practitioners or plain role-bios; explorers/subjects (Mungo Park) drop to the alt lens
   return lens==="alt" ? (!pr?n:0) : (pr?n:0);     // world (sciences: discipline-based)
 }
 // dependent territories (dependencies.json) are off the map and the ranking unless S.deps;
