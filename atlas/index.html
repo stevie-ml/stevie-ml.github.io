@@ -782,6 +782,13 @@ function isPractRole(i,fi,re){
   const d=P[i][17]||"";                                   // else a plain (non-clue) role description
   return re.test(d) && !isClueDesc(d);
 }
+// FINE-ARTS pure-subject filter: a person tagged subject in EVERY field (never a practitioner anywhere)
+// is a work-namesake / portrait subject / patron, not an artist — e.g. Judas Maccabeus (Handel's oratorio,
+// mis-disciplined into Auditory Fine Arts), Cosima Wagner, the Infanta in Las Meninas. Scoped to fine-arts
+// fields only; the sciences rolemap is noisier (Eisenstein/Franklin are mis-tagged all-subject) so they keep
+// the discipline-based logic.
+const FINEART=new Set(F.map((f,i)=>((/Fine Arts/.test(f)||f==="Misc Arts")&&KIND[i]==="world")?i:-1).filter(i=>i>=0));
+const isPureSubject=i=>{const rm=P[i][18]; if(!rm) return false; const v=Object.values(rm); return v.length>0 && !v.some(x=>x==="p");};
 // Narrative disciplines are FAMILIES: the pipeline collapses an author's discipline to one dominant genre
 // ("Misc Literature" for Goethe), but a novelist-dramatist-poet is a creator in every Literature genre he
 // carries weight in. Without this, Goethe (457 Literature) showed 114 and sat below Brecht (Sep 14 2026).
@@ -805,6 +812,7 @@ function memberW(i,fi,n,lens){
   if(k==="mythology") return (fic||FOLK.has(P[i][0]))?n:0;
   if(k==="religion")  return (!fic && (pr || fi===topf))?n:0;
   if(fi===GEOG){ const gp=isPractRole(i,fi,GEO_RE); return lens==="alt" ? (!gp?n:0) : (gp?n:0); } // geographers = rolemap practitioners or plain role-bios; explorers/subjects (Mungo Park) drop to the alt lens
+  if(FINEART.has(fi) && isPureSubject(i)) return lens==="alt" ? n : 0; // pure subjects (Judas Maccabeus, portrait subjects) are name-drops, never practitioners
   return lens==="alt" ? (!pr?n:0) : (pr?n:0);     // world (sciences: discipline-based)
 }
 // dependent territories (dependencies.json) are off the map and the ranking unless S.deps;
