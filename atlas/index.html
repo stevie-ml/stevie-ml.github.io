@@ -597,8 +597,8 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
 </footer>
 
 <script src="explorer_data.js?v=8d10e82ae4"></script>
-<script src="explorer_people_a.js?v=48fda1d361"></script>
-<script src="explorer_people_b.js?v=47b3a2510b"></script>
+<script src="explorer_people_a.js?v=9294fdfcda"></script>
+<script src="explorer_people_b.js?v=ef903de2b5"></script>
 <script>
 /* DATA, CC, GEO, DEP: see explorer_data.js + explorer_people_{a,b}.js */
 const F=DATA.fields, P=DATA.people, POP=DATA.pop;
@@ -762,6 +762,11 @@ const KIND=F.map(f=>{
   return "world";
 });
 const P_DISC=P.map(p=>new Set(p[9]||[]));   // discipline field indices per person
+const GEOG=F.indexOf("Geography");
+// rolemap (p[18]) tags each person practitioner "p" vs subject "s" PER FIELD — the reliable signal for
+// historians/geographers. (Discipline p[9] merely says the person appears in the field, so it leaks
+// subjects like Charles V into the History "chroniclers" lens and Mungo Park into Geography.)
+const isPract=(i,fi)=>((P[i][18]||{})[fi]==="p");
 // Narrative disciplines are FAMILIES: the pipeline collapses an author's discipline to one dominant genre
 // ("Misc Literature" for Goethe), but a novelist-dramatist-poet is a creator in every Literature genre he
 // carries weight in. Without this, Goethe (457 Literature) showed 114 and sat below Brecht (Sep 14 2026).
@@ -781,10 +786,11 @@ function memberW(i,fi,n,lens){
   if(n<=0) return 0;
   const k=KIND[fi], pr=P_DISC[i].has(fi), fic=!!P[i][19], topf=(P[i][8].length?P[i][8][0][0]:-1);
   if(k==="narrative") return lens==="alt" ? (fic?n:0) : ((narrPr(i,fi)&&!fic)?n:0);
-  if(k==="chronicle") return lens==="alt" ? (pr?n:0)  : ((!pr)?n:0);
+  if(k==="chronicle"){ const hp=isPract(i,fi); return lens==="alt" ? (hp?n:0) : (!hp?n:0); } // chroniclers = rolemap practitioners; subjects (Charles V) stay in the default figures view
   if(k==="mythology") return (fic||FOLK.has(P[i][0]))?n:0;
   if(k==="religion")  return (!fic && (pr || fi===topf))?n:0;
-  return lens==="alt" ? (!pr?n:0) : (pr?n:0);     // world
+  if(fi===GEOG){ const gp=isPract(i,fi); return lens==="alt" ? (!gp?n:0) : (gp?n:0); } // geographers = rolemap practitioners; explorers/subjects (Mungo Park) drop to the alt lens
+  return lens==="alt" ? (!pr?n:0) : (pr?n:0);     // world (sciences: discipline-based)
 }
 // dependent territories (dependencies.json) are off the map and the ranking unless S.deps;
 // their people still count in every field total and baseline (Stevie, Sep 11 2026)
