@@ -894,7 +894,7 @@ function compute(){
     if(S.basis==="nat"&&S.dual==="dest"&&p[12]) home=p[12];
     let gs=[];
     const pg=p[20]||[];                       // peoples membership, built in the pipeline
-    if(S.anc==="split"&&home&&HANDOFF[home]&&!pg.includes(HANDOFF[home])) pg.push(HANDOFF[home]);   // King Solomon (untagged, home Israel) counts as Jewish under Own group
+    if(S.anc!=="origin"&&home&&HANDOFF[home]){ if(!pg.includes(HANDOFF[home])) pg.push(HANDOFF[home]); home=null; }   // Israel IS the Jewish group whenever peoples are shown: natives join it, no separate Israel cell (Stevie: Marx under Israel)
     if(S.anc!=="origin"&&pg.length){
       gs=pg.slice();
       if(S.anc==="both"&&home) gs.push(home);       // Count both: the person counts for the country AND the group tile (English tile + one GB on the map; only Own group splits the map)
@@ -1094,7 +1094,7 @@ function render(){
   const anc=S.anc==="split";                 // the UK dissolves into its nations only under Own group (Stevie): Count both keeps one GB
   const PMAP={IL:"JEW",AM:"ARMN",BD:"BENG"};
   const UKS=["ENG","SCT","WLS","NIR"];
-  const remapG=S.anc==="split";
+  const remapG=S.anc!=="origin";             // the Israel/Armenia/Bangladesh polygons become their people group under Own group AND Count both
   const entries=[];
   for(const [cc,d] of Object.entries(G.p)){
     if(UKS.includes(cc)){ if(anc) entries.push([cc,d]); continue; }  // nations only when peoples split
@@ -1605,7 +1605,7 @@ $("f-lens").onchange=e=>{S.lens=e.target.checked;render();};
   $("f-inferred").onchange=e=>{S.inferred=e.target.checked;render();};
 seg("f-anc","anc","a");
 (function(){const el=$("f-anc");[...el.children].forEach(b=>{const o=b.onclick;
-  b.onclick=()=>{if(b.dataset.a==="origin"&&GSET.has(S.sel))S.sel=null; if(b.dataset.a==="split"&&HANDOFF[S.sel])S.sel=HANDOFF[S.sel]; if(b.dataset.a!=="split"&&S.sel&&Object.values(HANDOFF).includes(S.sel))S.sel=Object.keys(HANDOFF).find(k=>HANDOFF[k]===S.sel)||S.sel; o();};});})();
+  b.onclick=()=>{if(b.dataset.a==="origin"&&GSET.has(S.sel))S.sel=null; if(b.dataset.a!=="origin"&&HANDOFF[S.sel])S.sel=HANDOFF[S.sel]; if(b.dataset.a==="origin"&&S.sel&&Object.values(HANDOFF).includes(S.sel))S.sel=Object.keys(HANDOFF).find(k=>HANDOFF[k]===S.sel)||S.sel; o();};});})();
 [...$("rank-head").children].forEach(th=>{
   th.onclick=()=>{const k=th.dataset.k;
     if(S.sortK===k) S.sortAsc=!S.sortAsc; else {S.sortK=k;S.sortAsc=(k==="g");}
