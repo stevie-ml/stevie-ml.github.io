@@ -897,7 +897,7 @@ function compute(){
     if(S.anc==="split"&&home&&HANDOFF[home]&&!pg.includes(HANDOFF[home])) pg.push(HANDOFF[home]);   // King Solomon (untagged, home Israel) counts as Jewish under Own group
     if(S.anc!=="origin"&&pg.length){
       gs=pg.slice();
-      if(S.anc==="both"){ gs=gs.filter(g=>!UKNAT.has(g)); if(home) gs.push(home); }   // Count both: ENG/SCT/WLS/NIR fold into GB; only Own group splits the UK
+      if(S.anc==="both"&&home) gs.push(home);       // Count both: the person counts for the country AND the group tile (English tile + one GB on the map; only Own group splits the map)
     } else if(home) gs.push(home);
     if(S.dual==="both"&&S.basis==="nat"&&p[12]&&!gs.includes(p[12])) gs.push(p[12]);
     const rf=REGION[S.region]||REGION.all;
