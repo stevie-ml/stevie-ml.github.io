@@ -597,8 +597,8 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
 </footer>
 
 <script src="explorer_data.js?v=8d10e82ae4"></script>
-<script src="explorer_people_a.js?v=432d8483d0"></script>
-<script src="explorer_people_b.js?v=6dacad8626"></script>
+<script src="explorer_people_a.js?v=9299e43780"></script>
+<script src="explorer_people_b.js?v=ae6d3290d8"></script>
 <script>
 /* DATA, CC, GEO, DEP: see explorer_data.js + explorer_people_{a,b}.js */
 const F=DATA.fields, P=DATA.people, POP=DATA.pop;
@@ -736,6 +736,7 @@ const curLabel=()=>(S.multi&&S.multi.length)
   : (SEL[S.field]?SEL[S.field].label:"");
 const MLBL=()=>S.metric==="rca"?"RCA":S.metric==="share"?"share":"per-capita";
 const EUR=new Set("AL AD AT BY BE BA BG HR CY CZ DK EE FI FR DE GR HU IS IE IT XK LV LI LT LU MT MD MC ME NL MK NO PL PT RO RU SM RS SK SI ES SE CH UA GB VA ENG SCT WLS NIR CATA BASQ FO GG JE IM AX GI SJ".split(" "));
+const UKNAT=new Set(["ENG","SCT","WLS","NIR"]);
 const ANGLO=new Set("US GB CA AU NZ IE ENG SCT WLS NIR QUEB".split(" "));
 const TERRP=new Set("CATA BASQ QUEB AFRI".split(" "));   // region-bound peoples: filtered by geography, not exempt
 const REGION={
@@ -894,7 +895,7 @@ function compute(){
     const pg=p[20]||[];                       // peoples membership, built in the pipeline
     if(S.anc!=="origin"&&pg.length){
       gs=pg.slice();
-      if(S.anc==="both"&&home) gs.push(home);
+      if(S.anc==="both"){ gs=gs.filter(g=>!UKNAT.has(g)); if(home) gs.push(home); }   // Count both: ENG/SCT/WLS/NIR fold into GB; only Own group splits the UK
     } else if(home) gs.push(home);
     if(S.dual==="both"&&S.basis==="nat"&&p[12]&&!gs.includes(p[12])) gs.push(p[12]);
     const rf=REGION[S.region]||REGION.all;
@@ -1088,7 +1089,7 @@ function render(){
   Z.w=G.w; Z.h=G.h; applyZoom();
   svg.innerHTML="";
   const frag=document.createDocumentFragment();
-  const anc=S.anc!=="origin";
+  const anc=S.anc==="split";                 // the UK dissolves into its nations only under Own group (Stevie): Count both keeps one GB
   const PMAP={IL:"JEW",AM:"ARMN",BD:"BENG"};
   const UKS=["ENG","SCT","WLS","NIR"];
   const remapG=S.anc==="split";
