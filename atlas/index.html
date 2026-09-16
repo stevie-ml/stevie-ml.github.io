@@ -597,8 +597,8 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
 </footer>
 
 <script src="explorer_data.js?v=8d10e82ae4"></script>
-<script src="explorer_people_a.js?v=9ba2e04e08"></script>
-<script src="explorer_people_b.js?v=8ba6427a68"></script>
+<script src="explorer_people_a.js?v=3ca73b5ec3"></script>
+<script src="explorer_people_b.js?v=f17cea9a91"></script>
 <script>
 /* DATA, CC, GEO, DEP: see explorer_data.js + explorer_people_{a,b}.js */
 const F=DATA.fields, P=DATA.people, POP=DATA.pop;
@@ -945,7 +945,7 @@ function statFor(C,g){
 }
 
 function syncControls(){
-  if(document.activeElement!==fs) fs.value=SEL[S.field]?SEL[S.field].label:"";
+  if(document.activeElement!==fs) fs.value=(S.multi&&S.multi.length)?"":(SEL[S.field]?SEL[S.field].label:""); // blank the domain box while combined domains are active
   $("f-min").value=S.min; $("f-minlbl").textContent=S.min;
   $("f-conf").checked=S.conf;
   $("f-mentiononly").checked=S.mentonly;
@@ -1546,8 +1546,8 @@ buildSel(); S.field=Math.max(0,SEL.findIndex(o=>o.label==="Auditory Fine Arts"))
     else { menu.style.bottom="auto"; menu.style.top=r.bottom+"px"; menu.style.maxHeight=Math.min(below-8,420)+"px"; }
   }
   function openM(){ build(""); inp.select&&inp.select(); menu.classList.add("on"); place(); }
-  function closeM(){ menu.classList.remove("on"); inp.value=SEL[S.field]?SEL[S.field].label:""; }
-  function choose(i){ S.field=i; inp.value=SEL[i].label; menu.classList.remove("on"); render(); }
+  function closeM(){ menu.classList.remove("on"); inp.value=(S.multi&&S.multi.length)?"":(SEL[S.field]?SEL[S.field].label:""); }
+  function choose(i){ S.field=i; S.multi=null; const _ms=$("f-multi"); if(_ms)[..._ms.options].forEach(o=>o.selected=false); inp.value=SEL[i].label; menu.classList.remove("on"); render(); } // picking a single domain clears any combined selection
   inp.addEventListener("focus",openM);
   inp.addEventListener("input",()=>{ build(inp.value); menu.classList.add("on"); place(); });
   window.addEventListener("resize",()=>{ if(menu.classList.contains("on")) place(); });
