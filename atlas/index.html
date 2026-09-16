@@ -597,8 +597,8 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
 </footer>
 
 <script src="explorer_data.js?v=8d10e82ae4"></script>
-<script src="explorer_people_a.js?v=3ca73b5ec3"></script>
-<script src="explorer_people_b.js?v=f17cea9a91"></script>
+<script src="explorer_people_a.js?v=9d4d146075"></script>
+<script src="explorer_people_b.js?v=246262266f"></script>
 <script>
 /* DATA, CC, GEO, DEP: see explorer_data.js + explorer_people_{a,b}.js */
 const F=DATA.fields, P=DATA.people, POP=DATA.pop;
@@ -737,6 +737,7 @@ const curLabel=()=>(S.multi&&S.multi.length)
 const MLBL=()=>S.metric==="rca"?"RCA":S.metric==="share"?"share":"per-capita";
 const EUR=new Set("AL AD AT BY BE BA BG HR CY CZ DK EE FI FR DE GR HU IS IE IT XK LV LI LT LU MT MD MC ME NL MK NO PL PT RO RU SM RS SK SI ES SE CH UA GB VA ENG SCT WLS NIR CATA BASQ FO GG JE IM AX GI SJ".split(" "));
 const UKNAT=new Set(["ENG","SCT","WLS","NIR"]);
+const HANDOFF={IL:"JEW",AM:"ARMN",BD:"BENG"};   // Own group: these countries ARE their people group (polygon and membership alike)
 const ANGLO=new Set("US GB CA AU NZ IE ENG SCT WLS NIR QUEB".split(" "));
 const TERRP=new Set("CATA BASQ QUEB AFRI".split(" "));   // region-bound peoples: filtered by geography, not exempt
 const REGION={
@@ -893,6 +894,7 @@ function compute(){
     if(S.basis==="nat"&&S.dual==="dest"&&p[12]) home=p[12];
     let gs=[];
     const pg=p[20]||[];                       // peoples membership, built in the pipeline
+    if(S.anc==="split"&&home&&HANDOFF[home]&&!pg.includes(HANDOFF[home])) pg.push(HANDOFF[home]);   // King Solomon (untagged, home Israel) counts as Jewish under Own group
     if(S.anc!=="origin"&&pg.length){
       gs=pg.slice();
       if(S.anc==="both"){ gs=gs.filter(g=>!UKNAT.has(g)); if(home) gs.push(home); }   // Count both: ENG/SCT/WLS/NIR fold into GB; only Own group splits the UK
@@ -1603,7 +1605,7 @@ $("f-lens").onchange=e=>{S.lens=e.target.checked;render();};
   $("f-inferred").onchange=e=>{S.inferred=e.target.checked;render();};
 seg("f-anc","anc","a");
 (function(){const el=$("f-anc");[...el.children].forEach(b=>{const o=b.onclick;
-  b.onclick=()=>{if(b.dataset.a==="origin"&&GSET.has(S.sel))S.sel=null;o();};});})();
+  b.onclick=()=>{if(b.dataset.a==="origin"&&GSET.has(S.sel))S.sel=null; if(b.dataset.a==="split"&&HANDOFF[S.sel])S.sel=HANDOFF[S.sel]; if(b.dataset.a!=="split"&&S.sel&&Object.values(HANDOFF).includes(S.sel))S.sel=Object.keys(HANDOFF).find(k=>HANDOFF[k]===S.sel)||S.sel; o();};});})();
 [...$("rank-head").children].forEach(th=>{
   th.onclick=()=>{const k=th.dataset.k;
     if(S.sortK===k) S.sortAsc=!S.sortAsc; else {S.sortK=k;S.sortAsc=(k==="g");}
