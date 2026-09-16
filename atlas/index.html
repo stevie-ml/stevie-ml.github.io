@@ -597,8 +597,8 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
 </footer>
 
 <script src="explorer_data.js?v=8d10e82ae4"></script>
-<script src="explorer_people_a.js?v=b42115af18"></script>
-<script src="explorer_people_b.js?v=5d3b02474a"></script>
+<script src="explorer_people_a.js?v=5ec1efdc2f"></script>
+<script src="explorer_people_b.js?v=20136aa294"></script>
 <script>
 /* DATA, CC, GEO, DEP: see explorer_data.js + explorer_people_{a,b}.js */
 const F=DATA.fields, P=DATA.people, POP=DATA.pop;
@@ -761,7 +761,7 @@ const LITF=new Set(F.map((f,i)=>f.startsWith("Literature")?i:-1).filter(i=>i>=0)
 // strict-practitioners lens), religion, mythology, or world (practitioners default / named-not-
 // practitioner lens). Membership is computed from discipline (p[9]) + fictional flag (p[19]) + canon.
 const KIND=F.map(f=>{
-  if(/^Literature/.test(f)||f==="Movies"||f==="Other Fine Arts / Film"||f==="Television") return "narrative";
+  if(/^Literature/.test(f)||f==="Movies"||f==="Other Fine Arts / Film"||f==="Television"||f==="Other Fine Arts / Opera"||f==="Musicals"||f==="Other Fine Arts / Dance"||f==="Video Games"||f==="Misc Pop Culture"||f==="Auditory Fine Arts") return "narrative";   // stage, games and comics carry characters too (Stevie, Sep 16 2026)
   if(f==="History"||f==="Current Events") return "chronicle";
   if(f==="Religion") return "religion";
   if(f==="Mythology") return "mythology";
@@ -798,7 +798,9 @@ const FAM_LIT=new Set(F.map((f,i)=>/^Literature/.test(f)?i:-1).filter(i=>i>=0));
 const FAM_SCREEN=new Set(F.map((f,i)=>(f==="Movies"||f==="Other Fine Arts / Film"||f==="Television")?i:-1).filter(i=>i>=0));
 const P_LIT=P_DISC.map(d=>[...d].some(i=>FAM_LIT.has(i)));
 const P_SCREEN=P_DISC.map(d=>[...d].some(i=>FAM_SCREEN.has(i)));
-function narrPr(i,fi){ return FAM_LIT.has(fi) ? P_LIT[i] : (FAM_SCREEN.has(fi) ? P_SCREEN[i] : P_DISC[i].has(fi)); }
+const FAM_STAGE=new Set(F.map((f,i)=>(f==="Other Fine Arts / Opera"||f==="Musicals"||f==="Other Fine Arts / Dance"||f==="Auditory Fine Arts")?i:-1).filter(i=>i>=0));   // composers, librettists, choreographers
+const P_STAGE=P_DISC.map(d=>[...d].some(i=>FAM_STAGE.has(i)));
+function narrPr(i,fi){ return FAM_LIT.has(fi) ? P_LIT[i] : (FAM_SCREEN.has(fi) ? P_SCREEN[i] : (FAM_STAGE.has(fi) ? P_STAGE[i] : P_DISC[i].has(fi))); }
 // folk/legendary real people who ALSO belong in Mythology (curated; Wikidata tags them only "human").
 // They keep their real field AND appear in Mythology. (Mirrors folk_myth.json.)
 const FOLK=new Set(["George Washington","Johnny Appleseed","Davy Crockett","Daniel Boone","Paul Revere",
