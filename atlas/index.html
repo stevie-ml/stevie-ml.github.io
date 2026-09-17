@@ -1518,7 +1518,7 @@ function fillFields(){
 }
 buildSel(); S.field=Math.max(0,SEL.findIndex(o=>o.label==="Auditory Fine Arts")); fillFields();
 (function(){
-  if(!/claude\.ai$/.test(location.hostname)) { const pl=$("playlink"); if(pl) pl.style.display=""; }
+  if(!/claude\.ai$/.test(location.hostname) && /\/atlas\.html$/.test(location.pathname)) { const pl=$("playlink"); if(pl) pl.style.display=""; }   // only on the game site, where "/" is the game (not stevie.art/atlas/)
   const hSel=HASHP.get("sel"), hDom=HASHP.get("domain"), hEra=HASHP.get("era");
   if(hDom){ const k=SEL.findIndex(o=>o.label.toLowerCase()===hDom.toLowerCase()); if(k>=0){ S.field=k; fs.value=SEL[k].label; } }
   if(hEra){ const e=ERAS.findIndex(x=>x[0].toLowerCase()===hEra.toLowerCase()); if(e>=0) S.era=e; }
