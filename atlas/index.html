@@ -1,4 +1,15 @@
+<meta charset="utf-8">   <!-- must come first: without it the page is decoded as latin-1 wherever the server sends no charset, and the combining-mark regex throws -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"><link rel="icon" href="/favicon.ico" sizes="any"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Atlas of Eminence</title>
+<meta name="description" content="Which countries overproduce in which fields, measured by how often quizbowl asks about their people. Every figure clickable, by era and subject.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Infovore">
+<meta property="og:title" content="Atlas of Eminence"><meta property="og:description" content="Which countries overproduce in which fields, measured by how often quizbowl asks about their people. Every figure clickable, by era and subject.">
+<meta property="og:url" content="https://infovore.art/atlas.html"><meta property="og:image" content="https://infovore.art/og-atlas.png">
+<meta property="og:image:width" content="2400"><meta property="og:image:height" content="1260">
+<meta property="og:image:alt" content="A world map shaded by how much each country overproduces in a field, from the Atlas of Eminence.">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@zagrebbi">
+<meta name="twitter:title" content="Atlas of Eminence"><meta name="twitter:description" content="Which countries overproduce in which fields, measured by how often quizbowl asks about their people. Every figure clickable, by era and subject.">
+<meta name="twitter:image" content="https://infovore.art/og-atlas.png"><meta name="twitter:image:alt" content="A world map shaded by how much each country overproduces in a field, from the Atlas of Eminence.">
 <style>
 :root{
   --bg:#f7f6f3; --surface:#fffefc; --surface-2:#f1efe8;
@@ -46,7 +57,7 @@ header{
 }
 header .tagline{margin:0;color:var(--ink-2);font-size:13px;font-style:italic;max-width:56ch}
 .logo{height:52px;width:auto;align-self:center;filter:invert(var(--logo-invert))}
-.psearch{position:relative;order:8}
+.psearch{position:relative;order:8;align-self:center}   /* the buttons are centred; the search box has to be too, or it rides high */
 .psearch input{width:210px;padding:5px 10px;border:1px solid var(--rule);border-radius:0;
   background:var(--surface);color:var(--ink);font-family:var(--serif);font-size:13px;font-style:italic}
 .psearch input:focus{outline:2px solid var(--ink);outline-offset:1px}
@@ -58,6 +69,7 @@ header .tagline{margin:0;color:var(--ink-2);font-size:13px;font-style:italic;max
 .pres b{font-weight:600}
 .pres .sub{color:var(--ink-3);font-style:italic;font-size:11.5px}
 .fig.flash{animation:figflash 1.6s ease}
+.fig.hl{background:var(--sel-soft);box-shadow:inset 3px 0 0 var(--map-sel)}   /* found by search: stays highlighted until the next search */
 @keyframes figflash{0%,40%{background:var(--sel-soft)}100%{background:transparent}}
 .fig{cursor:pointer}
 .fig:hover{background:var(--surface-2)}
@@ -87,6 +99,8 @@ header .tagline{margin:0;color:var(--ink-2);font-size:13px;font-style:italic;max
 input#f-field{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:0;
   background:var(--surface);color:var(--ink);font-family:var(--serif);font-size:12.5px}
 input#f-field:focus{outline:2px solid var(--ink);outline-offset:1px}
+input#d-dom{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:0;background:var(--surface);color:var(--ink);font-family:var(--serif);font-size:12.5px}
+input#d-dom:focus{outline:2px solid var(--ink);outline-offset:1px}
 .combomenu{position:fixed;z-index:50;background:var(--surface);
   border:1px solid var(--rule);max-height:min(60vh,420px);overflow-y:auto;box-shadow:var(--shadow);display:none}
 .combomenu.on{display:block}
@@ -113,7 +127,7 @@ input#f-field:focus{outline:2px solid var(--ink);outline-offset:1px}
 .docs code{font-family:var(--mono);font-size:11.5px;background:var(--surface);border:1px solid var(--line);padding:0 4px}
 .docs .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
 header p{margin:0}
-.stat{display:flex;gap:6px;align-items:baseline}
+.stat{display:flex;gap:6px;align-items:baseline;align-self:center}   /* centred like the logo, search and buttons, not on the h1 baseline */
 .stat b{font-size:14px;font-weight:600}
 
 .wrap{display:grid;grid-template-columns:212px minmax(0,1fr) 344px;gap:0;align-items:start}
@@ -168,10 +182,18 @@ main{padding:20px 24px;min-width:0}
 .zoomhint{font-size:10.5px;font-style:italic;color:var(--ink-3);align-self:center}
 .maptitle{margin:0;font-size:23px;font-weight:600;letter-spacing:.09em;font-variant-caps:all-small-caps;color:var(--ink)}
 .mapwrap{position:relative;border:1px solid var(--rule);background:var(--surface);overflow:hidden}
+/* Containment only on the world view. inline-size containment computes the element's width WITHOUT
+   its contents, so putting it on .mapwrap collapsed .eurv's width:fit-content to 0 and the Europe map
+   vanished entirely (Stevie, Oct 11 2026). Europe sizes to the map, so it cannot also be a query
+   container; its one visible inset gets a pixel width instead, which is safe because the Europe map
+   is height-locked and therefore a near-constant size. */
+.mapwrap:not(.eurv){container-type:inline-size}
 .mapwrap.eurv{width:fit-content;margin:0 auto;max-width:100%}
 .mapwrap.eurv svg.map{height:min(72vh,680px);width:auto;max-width:100%}
+.mapwrap.eurv .inset{width:140px}
+.mapwrap.eurv .inset.car{width:140px;bottom:calc(140px * 0.908 + 42px)}
 svg.map{display:block;width:100%;height:auto;max-height:min(70vh,660px)}
-svg.map path{stroke:var(--surface);stroke-width:.9;stroke-linejoin:round;cursor:pointer;transition:opacity .1s ease;vector-effect:non-scaling-stroke}
+svg.map path{stroke:var(--surface);stroke-width:.9;stroke-linejoin:round;cursor:pointer;transition:opacity .1s ease,fill .45s ease;vector-effect:non-scaling-stroke}
 svg.map circle{vector-effect:non-scaling-stroke}
 svg.map path.nodata{fill:var(--surface-2);cursor:default}
 svg.map path.zerofill{cursor:pointer}
@@ -179,21 +201,25 @@ svg.map path.zerofill:hover{opacity:.75}
 svg.map path:not(.nodata):hover{opacity:.82}
 svg.map path.sel{stroke:var(--map-sel);stroke-width:4;paint-order:stroke}
 svg.map path.sel.nodata{stroke-dasharray:4 3}
-.inset.car{left:10px;right:auto;bottom:248px;width:216px;display:none}
+.inset.car{left:10px;right:auto;bottom:calc(14.5cqw * 0.908 + 42px);width:14.5cqw;display:none}   /* stacked above the Levant inset: its height is 0.908 of its width plus the label */
 .inset{
-  position:absolute;left:10px;bottom:10px;width:216px;
+  position:absolute;left:10px;bottom:10px;width:14.5cqw;   /* 14.5% of the map: the right edge stays short of Baja's tip at 17.4% whatever the window */
   border:1px solid var(--rule);background:var(--surface);
   box-shadow:var(--shadow);overflow:hidden;
 }
 .inset svg{display:block;width:100%;height:auto}
-.inset svg path{stroke:var(--surface);stroke-width:.7;stroke-linejoin:round;cursor:pointer}
+.inset svg path{stroke:var(--surface);stroke-width:.7;stroke-linejoin:round;cursor:pointer;transition:fill .45s ease}
 .inset svg path.nodata{fill:var(--line);opacity:.45;cursor:default}
 .inset svg path.sel{stroke:var(--map-sel);stroke-width:2.2;paint-order:stroke}
 .inset-lbl{
-  display:block;padding:3px 7px 4px;font-size:10px;font-weight:600;letter-spacing:.08em;
+  display:block;padding:3px 7px 4px;font-size:10px;font-weight:600;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   font-variant-caps:all-small-caps;color:var(--ink-3);border-top:1px solid var(--line);background:var(--surface);
 }
 @media(max-width:640px){.inset{display:none}}
+/* laptop widths: the geometry of the 80% view without zooming: slimmer side columns give the map ~1000px, insets at 80% clear the Americas */
+@media(min-width:1101px) and (max-width:1700px){
+  .wrap{grid-template-columns:176px minmax(0,1fr) 300px}
+}
 .tip{
   position:absolute;pointer-events:none;z-index:6;padding:6px 10px;
   background:var(--ink);color:var(--bg);font-size:11.5px;line-height:1.4;white-space:nowrap;
@@ -228,6 +254,32 @@ svg.map path.sel.nodata{stroke-dasharray:4 3}
 .ramp i{flex:1}
 
 .rankhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:30px 0 0;flex-wrap:wrap;border-top:4px double var(--rule);padding-top:12px}
+.ranktools{display:flex;align-items:center;gap:8px}
+.imgbtns{display:inline-flex;margin-left:10px}
+.imgbtns button{font:inherit;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--rule);padding:5px 10px;cursor:pointer}
+.imgbtns button+button{border-left:none}
+.imgbtns button:hover{color:var(--ink);border-color:var(--ink-3)}
+.imgbtns button:disabled{opacity:.6;cursor:default}
+#f-shot{font:inherit;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--rule);padding:5px 10px;cursor:pointer}
+#f-shot:hover{color:var(--ink);border-color:var(--ink-3)}
+#f-shot.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+/* The caption and credit only matter in a crop, where the page's own title is out of frame. */
+#rankcap{font-style:italic;color:var(--ink-3);font-size:13px;margin-top:3px}
+#rankfoot{display:none;justify-content:space-between;gap:16px;font-size:12px;color:var(--ink-3);padding:9px 2px 0;flex-wrap:wrap}
+#rankcredit{font-style:italic}
+/* Everything pooled makes RCA 1.00 and z 0.0 for every row by definition: two dead columns. */
+#rankwrap.nodegen th:nth-child(3),#rankwrap.nodegen td:nth-child(3),
+#rankwrap.nodegen th:nth-child(7),#rankwrap.nodegen td:nth-child(7){display:none}
+/* Screenshot view: a self-contained block worth cropping. */
+body.shot #f-find{display:none}
+body.shot #rankfoot{display:flex}
+body.shot .rankhead{border-top:none;padding-top:0;margin:0}
+/* float the exit control out of the card so it is never inside the crop */
+body.shot #f-shot{position:fixed;top:14px;right:16px;z-index:60;box-shadow:var(--shadow)}
+body.shot #rankwrap,body.shot .rankhead,body.shot #rankfoot{background:var(--surface)}
+body.shot #rankshell{border:1px solid var(--rule);padding:18px 20px 14px;background:var(--surface);margin-top:26px}
 #f-find{padding:4px 9px;border:1px solid var(--line);border-radius:0;background:var(--surface);color:var(--ink);font-family:var(--serif);font-size:12.5px;min-width:170px;font-style:italic}
 #f-find:focus{outline:2px solid var(--ink);outline-offset:1px}
 table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:8px}
@@ -319,7 +371,63 @@ tbody tr.zerorow td{color:var(--ink-3);font-style:italic}
   border:1px solid var(--line);padding:0 4px;cursor:help;font-style:normal}
 .empty-note{color:var(--ink-3);font-size:12.5px;padding:14px 0;font-style:italic}
 footer{padding:14px 26px 34px;border-top:1px solid var(--line);color:var(--ink-3);font-size:12px;margin-top:20px;font-style:italic}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* Design rule: nothing pops into existence. Rows, panels and menus arrive. */
+@keyframes arrive{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.arrive{animation:arrive .28s cubic-bezier(.2,.7,.2,1) both}
+.combomenu.on{animation:arrive .15s ease-out}
+/* ---- Daily Atlas: the same page with the controls gone and a guess panel where the country panel sits ---- */
+body.daily aside,body.daily #peoplesbox,body.daily .psearch,body.daily #apibtn{display:none!important}
+body.daily.secret .rankhead,body.daily.secret #rankwrap{display:none!important}
+#d-auth{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+#d-auth img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+#d-auth b{color:var(--ink)}
+#d-auth .apibtn{margin-left:auto}
+.dboard{display:flex;flex-direction:column;gap:3px}
+.dboard .lbl{margin:8px 0 3px}
+.dboard .row{display:grid;grid-template-columns:20px 22px minmax(0,1fr) auto;gap:7px;align-items:center;font-size:12.5px;padding:2px 0;border-bottom:1px solid var(--line)}
+.dboard .row.me{background:var(--sel-soft)}
+.dboard .row .rk{font-family:var(--mono);font-size:11px;color:var(--ink-3);text-align:right}
+.dboard .row img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+.dboard .row .dot{width:22px;height:22px;border-radius:50%;background:var(--surface-2);display:inline-block}
+.dboard .row a{color:var(--ink);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dboard .row a:hover{text-decoration:underline}
+.dboard .row .n{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);white-space:nowrap}
+.dboard .empty{font-size:12px;font-style:italic;color:var(--ink-3)}
+body.daily .wrap{grid-template-columns:312px minmax(0,1fr) 344px}
+body.daily.moving .wrap{transition:grid-template-columns .7s cubic-bezier(.2,.7,.2,1)}   /* armed after boot, so the page opens settled and only the reveal animates */
+body.daily.secret .wrap{grid-template-columns:312px minmax(0,1fr) 0px}   /* no country panel until the reveal: the map takes its width, so the insets clear the Americas */
+body.daily .panel{overflow:hidden}
+body.daily.moving .panel{transition:padding .7s cubic-bezier(.2,.7,.2,1),opacity .5s ease .2s}
+body.daily.secret .panel{padding-left:0;padding-right:0;border-left-color:transparent;opacity:0}
+@media(max-width:1100px){body.daily .wrap,body.daily.secret .wrap{grid-template-columns:1fr;transition:none}}
+body.daily.secret .panel>*:not(#d-lock){display:none!important}
+body.daily:not(.secret) #d-lock,body:not(.daily) #d-lock{display:none!important}
+#dpanel{display:none}
+body.daily #dpanel{display:flex;flex-direction:column;gap:14px;padding:20px 16px;border-right:1px solid var(--line);min-height:100vh}   /* only the daily has a game column; on the Atlas the slot must not exist */
+@media(max-width:1100px){#dpanel{border-right:0;border-bottom:1px solid var(--line);min-height:0}}
+#dpanel .lead{font-size:12.5px;color:var(--ink-2);font-style:italic;margin:0}
+#d-go{padding:7px 12px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);font-family:var(--serif);font-size:12.5px;
+  font-weight:600;letter-spacing:.09em;font-variant-caps:all-small-caps;cursor:pointer;border-radius:0}
+#d-go:disabled{opacity:.4;cursor:default}
+#d-rows{display:flex;flex-direction:column;gap:5px}
+.drow{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.dg{padding:5px 8px;border:1px solid var(--line);font-size:12.5px;text-align:center;background:var(--surface-2);color:var(--ink-3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dg.ok{background:#1f8f3f;border-color:#1f8f3f;color:#fff}
+.dg.near{background:#c99a1e;border-color:#c99a1e;color:#fff}
+.dg.dir{background:var(--surface);color:var(--ink);border-color:var(--rule)}
+.drow.blank .dg{border-style:dashed;background:transparent}
+.dkey{font-size:11px;color:var(--ink-3);font-style:italic;line-height:1.5}
+#d-end{display:flex;flex-direction:column;gap:9px;padding-top:12px;border-top:4px double var(--rule)}
+#d-end .big{font-size:16px;font-weight:600}
+#d-end .apibtn{align-self:flex-start}
+.drow2{display:flex;flex-wrap:wrap;gap:6px}
+.drow2 .apibtn{align-self:auto}
+.apibtn.prim{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.apibtn.prim:hover{opacity:.9;color:var(--bg)}
+#d-stats{font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+#d-share{border:1px solid var(--line);padding:8px 10px;font-family:var(--mono);font-size:12px;white-space:pre;line-height:1.5}
 </style>
 
 <header>
@@ -336,7 +444,7 @@ footer{padding:14px 26px 34px;border-top:1px solid var(--line);color:var(--ink-3
     <div id="psearch-menu"></div>
   </div>
   <a class="apibtn" id="playlink" href="/" style="display:none;text-decoration:none">Play &rarr;</a>
-  <button class="apibtn" id="recbtn">Records</button>
+  <a class="apibtn" id="dailylink" href="/daily" style="text-decoration:none">Daily &rarr;</a>
   <button class="apibtn" id="apibtn">API</button>
 </header>
 
@@ -496,6 +604,7 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
       </div>
     </details>
   </aside>
+  <div id="dpanel" hidden></div>
 
   <main>
     <div class="maphead">
@@ -504,6 +613,7 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
         <button data-v="wld" aria-pressed="true">World</button>
         <button data-v="eur" aria-pressed="false">Europe</button>
       </div>
+      <span class="imgbtns"><button type="button" id="f-mapimg" title="Copy the map as a 16:9 PNG, the slot X gives a single image">Copy 16:9</button><button type="button" id="f-mapimg2" title="Copy the map as a 7:8 tile, the slot X gives each image in a two-image post">Copy tile</button></span>
     </div>
     <div class="mapwrap">
       <svg class="map" id="map" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Choropleth of relative comparative advantage by country">
@@ -542,12 +652,17 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
       </div>
       <div id="mpbody"></div>
     </aside>
+    <div id="rankshell">
     <div class="rankhead">
-      <div class="lbl">All countries ranked</div>
-      <input type="search" id="f-find" placeholder="find a country…" aria-label="find a country">
+      <div><div class="lbl">All countries ranked</div><div id="rankcap"></div></div>
+      <div class="ranktools">
+        <button type="button" id="f-shot" title="Tidy this table for a screenshot: top rows only, thin countries and constant columns dropped, caption and credit shown">Screenshot view</button>
+        <span class="imgbtns"><button type="button" id="f-rankimg" title="Copy the ranking as a 16:9 PNG">Copy 16:9</button><button type="button" id="f-rankimg2" title="Copy the ranking as a 7:8 tile, to pair with the map">Copy tile</button></span>
+        <input type="search" id="f-find" placeholder="find a country…" aria-label="find a country">
+      </div>
     </div>
     <div class="lbl" style="display:none">All countries ranked <span id="r-note" style="text-transform:none;letter-spacing:0;font-weight:400"></span></div>
-    <div style="overflow-x:auto">
+    <div style="overflow-x:auto" id="rankwrap">
       <table>
         <thead><tr id="rank-head">
           <th data-k="g">Country</th>
@@ -562,9 +677,12 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
         <tbody id="rank"></tbody>
       </table>
     </div>
+    <div id="rankfoot"><span id="rankfootnote"></span><span id="rankcredit">Made by Stevie Miller · quizbowl canon via qbreader · infovore.art</span></div>
+    </div>
   </main>
 
   <div class="panel">
+    <div id="d-lock" class="empty-note" hidden>The country panel opens once you have finished today’s puzzle.</div>
     <div class="cellhead">
       <div class="who" id="p-who">Select a country</div>
       <div class="what" id="p-what">Click any tile on the map or a row in the ranking.</div>
@@ -596,9 +714,9 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
   defined by nationality or by geographic content, which makes RCA within them tautological.
 </footer>
 
-<script src="explorer_data.js?v=8d10e82ae4"></script>
-<script src="explorer_people_a.js?v=d12791578d"></script>
-<script src="explorer_people_b.js?v=1c6c4c617d"></script>
+<script src="explorer_data.js?v=5c0e395cea"></script>
+<script src="explorer_people_a.js?v=41ff961a5c"></script>
+<script src="explorer_people_b.js?v=3e0a134947"></script>
 <script>
 /* DATA, CC, GEO, DEP: see explorer_data.js + explorer_people_{a,b}.js */
 const F=DATA.fields, P=DATA.people, POP=DATA.pop;
@@ -731,7 +849,10 @@ function zoomAt(px,py,nk){
 const RCAF=v=>(v==null||!isFinite(v))?"\u2014":v.toFixed(2);
 const ZF=v=>(v==null||!isFinite(v))?"\u2014":(v>0?"+":"")+v.toFixed(1);
 const fmt=v=>v===null||v===undefined?"—":(S.metric==="share"?(v*100).toFixed(1)+"%":(v<10?v.toFixed(2):v.toFixed(0)));
-const curLabel=()=>(S.multi&&S.multi.length)
+const DAILY=/^\/daily\/?$/.test(location.pathname);   // the daily game rides on this page: one hidden era x domain, five guesses
+let DAILY_SECRET=false;                               // true while today's answer must stay out of every label on the page
+const eraName=()=>DAILY_SECRET?"this era":ERAS[S.era][0];
+const curLabel=()=>DAILY_SECRET?"this domain":(S.multi&&S.multi.length)
   ? (S.multi.length<=3 ? S.multi.map(i=>disp(F[i])).join(" + ") : `${S.multi.length} domains pooled`)
   : (SEL[S.field]?SEL[S.field].label:"");
 const MLBL=()=>S.metric==="rca"?"RCA":S.metric==="share"?"share":"per-capita";
@@ -739,16 +860,24 @@ const EUR=new Set("AL AD AT BY BE BA BG HR CY CZ DK EE FI FR DE GR HU IS IE IT X
 const UKNAT=new Set(["ENG","SCT","WLS","NIR"]);
 const HANDOFF={IL:"JEW",AM:"ARMN",BD:"BENG"};   // Own group: these countries ARE their people group (polygon and membership alike)
 const ANGLO=new Set("US GB CA AU NZ IE ENG SCT WLS NIR QUEB".split(" "));
-const TERRP=new Set("CATA BASQ QUEB AFRI".split(" "));   // region-bound peoples: filtered by geography, not exempt
+// Every people group gets a home country, so the region filters can place it. Before this, any group
+// that was not European, anglosphere or territorial was EXEMPT from the region filter, so "Europe only"
+// still listed African Americans and Parsis (Stevie, Oct 11 2026). The home is where the group is
+// counted, not a claim about origin: Romani are placed in Europe though they came from South Asia.
+// JEW is placed in Europe (Poland, the historical centre of Ashkenazi Jewry), not Israel: the figures
+// the canon remembers under this group are overwhelmingly European, so Europe is where the group counts.
+const PHOME={JEW:"PL",ROMA:"RO",AFAM:"US",ENG:"GB",SCT:"GB",WLS:"GB",NIR:"GB",CATA:"ES",BASQ:"ES",
+             PARS:"IN",QUEB:"CA",AFRI:"ZA",ARMN:"AM",KURD:"IQ",BENG:"BD",COPT:"EG"};
+const rkey=g=>PHOME[g]||g;                               // a people answers the region test as its home country
 const REGION={
   all:()=>true,
-  eur:g=>EUR.has(g),
-  noneur:g=>!EUR.has(g),
-  nonwest:g=>!EUR.has(g)&&!ANGLO.has(g),
-  asia:g=>"AF AM AZ BH BD BT BN KH CN CY GE IN ID IR IQ IL JP JO KZ KW KG LA LB MY MV MN MM NP KP KR OM PK PS PH QA SA SG LK SY TW TJ TH TL TR TM AE UZ VN YE".split(" ").includes(g),
-  africa:g=>"DZ AO BJ BW BF BI CM CV CF TD KM CD CG CI DJ EG GQ ER SZ ET GA GM GH GN GW KE LS LR LY MG MW ML MR MU MA MZ NA NE NG RW ST SN SC SL SO ZA SS SD TZ TG TN UG ZM ZW AFRI".split(" ").includes(g),
-  americas:g=>"AG AR BS BB BZ BO BR CA CL CO CR CU DM DO EC SV GD GT GY HT HN JM MX NI PA PY PE KN LC VC SR TT US UY VE PR MQ GP GF QUEB".split(" ").includes(g),
-  mena:g=>"DZ BH EG IR IQ IL JO KW LB LY MA OM PS QA SA SY TN AE YE TR".split(" ").includes(g),
+  eur:g=>EUR.has(rkey(g)),
+  noneur:g=>!EUR.has(rkey(g)),
+  nonwest:g=>!EUR.has(rkey(g))&&!ANGLO.has(rkey(g)),
+  asia:g=>"AF AM AZ BH BD BT BN KH CN CY GE IN ID IR IQ IL JP JO KZ KW KG LA LB MY MV MN MM NP KP KR OM PK PS PH QA SA SG LK SY TW TJ TH TL TR TM AE UZ VN YE".split(" ").includes(rkey(g)),
+  africa:g=>"DZ AO BJ BW BF BI CM CV CF TD KM CD CG CI DJ EG GQ ER SZ ET GA GM GH GN GW KE LS LR LY MG MW ML MR MU MA MZ NA NE NG RW ST SN SC SL SO ZA SS SD TZ TG TN UG ZM ZW AFRI".split(" ").includes(rkey(g)),
+  americas:g=>"AG AR BS BB BZ BO BR CA CL CO CR CU DM DO EC SV GD GT GY HT HN JM MX NI PA PY PE KN LC VC SR TT US UY VE PR MQ GP GF QUEB".split(" ").includes(rkey(g)),
+  mena:g=>"DZ BH EG IR IQ IL JO KW LB LY MA OM PS QA SA SY TN AE YE TR".split(" ").includes(rkey(g)),
 };
 const EST=new Set(DATA.pop_estimated||[]);
 const GROUPS=DATA.groups||[{code:"JEW",name:"Jewish ancestry"},{code:"ROMA",name:"Romani ancestry"},{code:"AFAM",name:"African American"}];
@@ -768,6 +897,8 @@ const KIND=F.map(f=>{
   return "world";
 });
 const P_DISC=P.map(p=>new Set(p[9]||[]));   // discipline field indices per person
+const HISTI=F.indexOf("History"), RELI=F.indexOf("Religion");
+let THEO_STRICT=true;                        // theologians = Religion practitioners (see compute)
 const GEOG=F.indexOf("Geography");
 // rolemap (p[18]) tags each person practitioner "p" vs subject "s" PER FIELD — the reliable signal for
 // historians/geographers. (Discipline p[9] merely says the person appears in the field, so it leaks
@@ -778,6 +909,7 @@ const GEOG=F.indexOf("Geography");
 // ("patronised the chronicler"), so they are excluded — that keeps subjects like Attila out.
 const CHRON_RE=/\b(historian|historiographer|chronicler|annalist|antiquarian|journalist|reporter|correspondent|columnist)\b/i;
 const GEO_RE=/\b(geographer|cartographer)\b/i;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));   // was called in four places but never defined: the search dropdown threw on every keystroke
 const isClueDesc=d=>{d=(d||"").trim();return d.startsWith("“")||d.startsWith('"')||/^(Name|Give|Identify) this/.test(d);};
 function isPractRole(i,fi,re){
   if((P[i][18]||{})[fi]==="p") return true;              // rolemap practitioner
@@ -808,12 +940,18 @@ const FOLK=new Set(["George Washington","Johnny Appleseed","Davy Crockett","Dani
   "Kit Carson","Calamity Jane","Buffalo Bill","Sacagawea","William Tell","Robin Hood","Lady Godiva",
   "Rob Roy","El Cid","Saladin","Ned Kelly"]);
 // membership weight of person i in field fi (canon weight n) under a lens ("default"|"alt")
+// A fictional row dated 1000 or later whose descriptor does not call it legendary or a deity is an authored character
+// (Percy Jackson 1993, Bowser 1989, Gulliver 1661): its Mythology-category mentions do not make it a myth figure.
+// Legendary rows keep their traditional dates (King Arthur 500, Mama Ocllo 1197 "legendary figure") and undated ones (Odysseus) are untouched.
+const LEGEND_RE=/legendary|deity|deities|\bgod\b|goddess|folk|mytholog|hero of/i;
+function authoredChar(i){ const p=P[i]; return p[4]!=null&&p[4]>=1000&&!LEGEND_RE.test(p[17]||""); }
+let PANEL_LAST=null;                                     // the country the panel last showed, so its list arrives only on a change
 function memberW(i,fi,n,lens){
   if(n<=0) return 0;
   const k=KIND[fi], pr=P_DISC[i].has(fi), fic=!!P[i][19], topf=(P[i][8].length?P[i][8][0][0]:-1);
   if(k==="narrative") return lens==="alt" ? (fic?n:0) : ((narrPr(i,fi)&&!fic)?n:0);
   if(k==="chronicle"){ const hp=isPractRole(i,fi,CHRON_RE); return lens==="alt" ? (hp?n:0) : (!hp?n:0); } // chroniclers = rolemap practitioners or plain role-bios; subjects (Charles V) stay in the default figures view
-  if(k==="mythology") return (fic||FOLK.has(P[i][0]))?n:0;
+  if(k==="mythology") return ((fic&&!authoredChar(i))||FOLK.has(P[i][0]))?n:0;
   if(k==="religion")  return (!fic && (pr || fi===topf))?n:0;
   if(fi===GEOG){ const gp=isPractRole(i,fi,GEO_RE); return lens==="alt" ? (!gp?n:0) : (gp?n:0); } // geographers = rolemap practitioners or plain role-bios; explorers/subjects (Mungo Park) drop to the alt lens
   if(FINEART.has(fi) && isPureSubject(i)) return lens==="alt" ? n : 0; // pure subjects (Judas Maccabeus, portrait subjects) are name-drops, never practitioners
@@ -826,7 +964,10 @@ const CHIP=g=>(GNAME[g]||g).replace(" ancestry","");
 const isDark=()=>{const t=document.documentElement.getAttribute("data-theme");
   return t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches);};
 
+const SHOT_MIN=20, SHOT_ROWS=15;
+let RANKALL=[];        // full ranked list behind the table, for the image export     // screenshot view floor: below this a per-capita rank is sampling noise
 let SCALEMAX=1; let POOLED_ALL=false;                     // set per render; only used by the sequential (share) ramp
+const WSCALE=()=>((typeof DATA!=='undefined'&&DATA.wscale)||1);   // this build's total weight over the Oct 2026 unweighted reference; weight-unit gates scale by it
 function color(v){
   if(v===null||v===undefined||!isFinite(v)) return null;
   const dark=isDark();
@@ -857,7 +998,7 @@ function textOn(v){
 
 function win(){ if(S.lo!==null) return [S.lo,S.hi];
   const e=ERAS[S.era]; return S.era===0?[-9999,9999]:[e[1],e[2]]; }
-const STATE_V=23;
+const STATE_V=25;
 const HASHP={_m:{},get(k){return this._m[k]??null}};
 for(const kv of (location.hash.slice(1)||"").split("&")){
   const i=kv.indexOf("="); if(i>0) HASHP._m[decodeURIComponent(kv.slice(0,i))]=decodeURIComponent(kv.slice(i+1));
@@ -866,8 +1007,17 @@ const NOW=2026;
 function span(p){                       // active years: birth..death, or birth..now if living
   const b=p[4]; if(b===null||b===undefined) return null;
   const d=p[15];
-  const end = d===-1 ? NOW : (d===null||d===undefined ? Math.min(NOW,b+72) : d);
+  const end = (d===-1&&b>=1905) ? NOW : (d===null||d===undefined||d===-1 ? Math.min(NOW,b+72) : d);   // "alive" before 1905 is a data error, read as unknown
   return [b,Math.max(b,end)];
+}
+// which preset eras a person belongs to, by the same rule inEra() applies to one of them
+function erasOf(p){
+  const out=[];
+  if(S.erabasis==="birth"){ const y=p[4]; if(y===null||y===undefined) return out;
+    for(let e=1;e<ERAS.length;e++) if(y>=ERAS[e][1]&&y<=ERAS[e][2]){ out.push(e); break; } return out; }
+  const s=span(p); if(!s) return out;
+  for(let e=1;e<ERAS.length;e++) if(s[0]<=ERAS[e][2]&&s[1]>=ERAS[e][1]) out.push(e);
+  return out;
 }
 function inEra(p){
   const [a,b]=win(); if(a<=-9999&&b>=9999) return true;
@@ -875,22 +1025,80 @@ function inEra(p){
   const s=span(p); if(!s) return false;
   return s[0]<=b && s[1]>=a;            // lifespan overlaps the window
 }
-function popOf(g){ const s=POP[g]; if(!s) return null; const [a,b]=win();
-  let v=s.filter(r=>r[0]>=a&&r[0]<=b).map(r=>r[1]);
-  if(!v.length){ let best=null,bd=1e9; for(const r of s){const d=Math.min(Math.abs(r[0]-a),Math.abs(r[0]-b));
-    if(d<bd){bd=d;best=r[1];}} return best; }
-  return v.reduce((x,y)=>x+y,0)/v.length; }
+// ---- the per-capita denominator ----
+// Population at the times the selection's figures actually lived. compute() bins the selection's
+// output by when each person was active (TW, global across every group, so no group weights itself),
+// and a group's population is its series interpolated at those times, weighted by that output.
+//
+// It replaced a plain mean of whichever datapoints fell inside the era window (Stevie, Oct 11 2026).
+// That was sensitive to how densely each series is sampled: country series are annual after 1800
+// (89% of the UK's 249 points), the hand-built people series have 9-14 points spread over two
+// millennia, so the two were averaging different periods. English read 16.4M against a true 26.0M
+// and per capita 4.06 against 2.57. Countries were roughly right by accident, since their dense
+// sampling and the canon's output are both concentrated after 1800.
+// A plain time-weighted mean is NOT the fix: it averages in long low-population tails that hold
+// almost no output, which sent the UK to 17.5 and the Netherlands from 15th to 7th.
+const TW_LO=-3500, TW_HI=2030, TW_STEP=10, TW_N=Math.floor((TW_HI-TW_LO)/TW_STEP)+1;
+let POPTW=null;                                  // output weight per time bin, set by compute()
+const POPSORT={};                                // series sorted once, interpolation needs order
+function popSeries(g){ if(!(g in POPSORT)){ const s=POP[g]; POPSORT[g]=s?s.slice().sort((a,b)=>a[0]-b[0]):null; } return POPSORT[g]; }
+function popAt(s,t){
+  if(t<=s[0][0]) return s[0][1];
+  const L=s.length; if(t>=s[L-1][0]) return s[L-1][1];
+  let lo=0,hi=L-1; while(hi-lo>1){ const m=(lo+hi)>>1; if(s[m][0]<=t) lo=m; else hi=m; }
+  const [x0,y0]=s[lo],[x1,y1]=s[hi]; return x1===x0?y0:y0+(y1-y0)*(t-x0)/(x1-x0);
+}
+function popOf(g,TWo){                           // TWo: the weights of the compute() whose stats these are
+  const s=popSeries(g); if(!s||!s.length) return null;
+  const W=TWo||POPTW;
+  if(W&&W.mass>0){
+    let num=0; for(const k of W.bins) num+=W.w[k]*popAt(s,TW_LO+k*TW_STEP);
+    return num/W.mass;
+  }
+  // nothing selected to weight by: fall back to the population across the era window
+  const [a,b]=win(), lo=Math.max(a,s[0][0]), hi=Math.min(b,s[s.length-1][0]);
+  return lo>=hi ? popAt(s,Math.min(Math.max(a,s[0][0]),s[s.length-1][0])) : popAt(s,(lo+hi)/2);
+}
 
+// which field indices the current selection covers; POOLED_ALL is derived from it, and render()
+// sets it before syncControls() so the controls never describe the previous selection
+function fixSet(){ return new Set(S.multi&&S.multi.length?S.multi:(SEL[S.field]?SEL[S.field].ix:[])); }
+// ---- per capita across all eras: observed over expected ----
+// Within one era, per capita is a country's share of the canon over its share of population, and
+// that is well defined. Pooling eras is where every simple rule fails: Greece is 5.8x par in
+// antiquity and 0.3x since, and depending on how you average those it lands anywhere from #1 to
+// #20 in Europe. So the "All" preset does not average populations at all. For each era it takes
+// the output a country produced and the output its population share predicted (era canon size x
+// population share), then divides the sums: a standardized ratio, the way a rate is pooled across
+// strata. Each era is fair on its own terms, no start year has to be chosen, and the pooled figure
+// is a weighted mean of the per-era figures, so it always lands between a country's best and worst
+// era. Checked against the six era views it is built from: 0 of 42 European groups fall outside
+// their own range (Stevie, Oct 11 2026). A custom year window is treated as a single era.
 function compute(){
-  const FIX=new Set(S.multi&&S.multi.length?S.multi:(SEL[S.field]?SEL[S.field].ix:[]));
+  const FIX=fixSet();
   POOLED_ALL = FIX.size>=F.length;
   const cell=new Map(), G=new Map(), Ftot=new Map(); let T=0;
   const members=new Map();
+  const tw=new Float64Array(TW_N), [wa,wb]=win();
+  const POOL=(S.era===0&&S.lo===null), NE=ERAS.length-1;
+  // Theologians count as thinkers even where their questions are filed under History. Quizbowl asks
+  // about Luther as an actor in history three times as often as it asks about him as a theologian
+  // (History 314, Religion 102), so Thought saw 102 against Kant's 629 and ranked him 14th in
+  // Germany. Whenever Religion is selected and History is not, a Religion practitioner's History
+  // weight follows Religion. "Practitioner" is the role tag, which already draws the line: Luther,
+  // Zwingli, Calvin, Wycliffe, Edwards, Alcuin are p; popes, Khomeini, Penn, Brigham Young are s.
+  // THEO_STRICT=false widens it to anyone with Religion among their disciplines (Stevie, Oct 11 2026).
+  const ROUTE=FIX.has(RELI)&&!FIX.has(HISTI);
+  const obsE=POOL?Array.from({length:NE+1},()=>new Map()):null;     // selected output per era per group
+  const presE=POOL?Array.from({length:NE+1},()=>new Set()):null;    // groups with any output in the era
+  const OE=POOL?new Float64Array(NE+1):null;                         // selected output per era, all groups
+  const twE=POOL?Array.from({length:NE+1},()=>new Float64Array(TW_N)):null;
   for(let i=0;i<P.length;i++){
     const p=P[i];
     if(S.conf&&p[7]===0) continue;
     if(!S.mentonly&&p[21]) continue;
-    if(!S.fict&&p[19]) continue;                 // "Include fictional figures" off -> hide legendary/fictional
+    if((!S.fict||POOLED_ALL)&&p[19]) continue;   // off -> hide legendary/fictional; pooling everything always hides them
+                                                 // (Stevie, Sep 28 2026: Osiris and Horus topped Egypt over Mahfouz and Nasser)
     if(!inEra(p)) continue;
     let home=S.basis==="nat"?p[1]:S.basis==="birth"?p[2]:p[3];
     if(S.basis==="nat"&&S.dual==="dest"&&p[12]) home=p[12];
@@ -903,16 +1111,20 @@ function compute(){
     } else if(home) gs.push(home);
     if(S.dual==="both"&&S.basis==="nat"&&p[12]&&!gs.includes(p[12])) gs.push(p[12]);
     const rf=REGION[S.region]||REGION.all;
-    gs=gs.filter(g=>(GSET.has(g)&&!EUR.has(g)&&!ANGLO.has(g)&&!TERRP.has(g))||rf(g));
+    gs=gs.filter(g=>rf(g));                  // peoples are placed by PHOME, so none is exempt any more
     if(!gs.length) continue;
+    const pe=POOL?erasOf(p):null;
     const fl=p[8];                             // canon weights (answerlines + mentions, pooled)
+    let selW=0;                                // this person's weight in the selection, counted once
+    const theo=ROUTE&&!p[19]&&(THEO_STRICT?((p[18]||{})[RELI]==="p"):P_DISC[i].has(RELI));
     // PARADIGM: membership by field-kind. The active lens applies to the SELECTED field(s); every
     // other field uses its default membership (so cross-field totals / RCA stay consistent).
     for(const [fi,n] of fl){
-      const isSel=FIX.has(fi);
+      const isSel=FIX.has(fi)||(theo&&fi===HISTI);
       const lens = (isSel && S.lens) ? "alt" : "default";
       const w=memberW(i,fi,n,lens);
       if(w<=0) continue;
+      if(isSel) selW+=w;
       for(const g of gs){
         cell.set(g+"|"+(isSel?"SEL":fi),(cell.get(g+"|"+(isSel?"SEL":fi))||0)+w);
         G.set(g,(G.get(g)||0)+w);
@@ -923,18 +1135,45 @@ function compute(){
           const mm=members.get(g); const at=mm.findIndex(r=>r[0]===i);
           if(at>=0) mm[at][1]+=w; else mm.push([i,w]);
         } else Ftot.set(fi,(Ftot.get(fi)||0)+w);
+        if(pe) for(const e of pe){ presE[e].add(g);
+          if(isSel){ obsE[e].set(g,(obsE[e].get(g)||0)+w); OE[e]+=w; } }
       }
     }
+    if(selW>0){                                // when this person was active, clipped to the era window
+      const sp=span(p);
+      if(sp){ const mid=(sp[0]+sp[1])/2;
+        const t=Math.max(Math.max(wa,TW_LO),Math.min(Math.min(wb,TW_HI),mid));
+        tw[Math.round((t-TW_LO)/TW_STEP)]+=selW;
+        if(pe) for(const e of pe){                 // and within each era it belongs to, for that era's population
+          const te=Math.max(Math.max(ERAS[e][1],TW_LO),Math.min(Math.min(ERAS[e][2],TW_HI),mid));
+          twE[e][Math.round((te-TW_LO)/TW_STEP)]+=selW; } }
+    }
   }
-  let popTot=0; for(const g of G.keys()){const v=popOf(g); if(v) popTot+=v;}
-  return {cell,G,Ftot,T,members,popTot};
+  { const bins=[]; let mass=0; for(let k=0;k<TW_N;k++) if(tw[k]>0){ bins.push(k); mass+=tw[k]; }
+    POPTW={w:tw,bins,mass}; }
+  let popTot=0; for(const g of G.keys()){const v=popOf(g,POPTW); if(v) popTot+=v;}
+  let pool=null;
+  if(POOL){
+    const obs=new Map(), exp=new Map();
+    for(let e=1;e<=NE;e++){
+      if(!OE[e]) continue;
+      const w=twE[e], bins=[]; let mass=0; for(let k=0;k<TW_N;k++) if(w[k]>0){ bins.push(k); mass+=w[k]; }
+      if(!mass) continue;
+      const We={w,bins,mass}, pe=new Map(); let PE=0;
+      for(const g of presE[e]){ const v=popOf(g,We); if(v){ pe.set(g,v); PE+=v; } }
+      if(!PE) continue;
+      for(const [g,v] of pe){ exp.set(g,(exp.get(g)||0)+OE[e]*v/PE); obs.set(g,(obs.get(g)||0)+(obsE[e].get(g)||0)); }
+    }
+    pool={obs,exp};
+  }
+  return {cell,G,Ftot,T,members,popTot,tw:POPTW,pool};
 }
 
 function statFor(C,g){
   const w=C.cell.get(g+"|SEL")||0;
   const ft=C.Ftot.get("SEL")||0, gt=C.G.get(g)||0;
   if(!ft||!C.T) return null;
-  const pop=popOf(g);
+  const pop=popOf(g,C.tw);                    // the weights this C was built with, not whatever ran last
   // gt===0 means nobody from g is in the canon at all this era. Share and
   // per-capita are still defined (they are zero); RCA and z are 0/0, so null.
   if(!gt&&!pop) return null;
@@ -942,7 +1181,12 @@ function statFor(C,g){
   const exp=gt*ft/C.T;
   const rca=gt?(w/ft)/(gt/C.T):null, share=w/ft;
   let percap=null, perM=null;
-  if(pop&&C.popTot){ percap=share/(pop/C.popTot); perM=w/pop; }
+  if(C.pool){                                  // all eras: observed over expected, era by era (see compute)
+    const x=C.pool.exp.get(g)||0;
+    if(x>0) percap=(C.pool.obs.get(g)||0)/x;
+    else if(pop&&C.popTot) percap=0;           // in the canon nowhere: zero, as before
+    if(pop) perM=w/pop;
+  } else if(pop&&C.popTot){ percap=share/(pop/C.popTot); perM=w/pop; }
   const val = S.metric==="rca"?rca : S.metric==="share"?share : percap;
   return {obs:w,exp,rca,z:gt?(w-exp)/Math.sqrt(exp):null,share,pop,percap,perM,val,
           n:(C.members.get(g)||[]).length,absent:!gt};
@@ -953,7 +1197,12 @@ function syncControls(){
   $("f-min").value=S.min; $("f-minlbl").textContent=S.min;
   $("f-conf").checked=S.conf;
   $("f-mentiononly").checked=S.mentonly;
-  $("f-fictional").checked=S.fict;
+  $("f-fictional").checked=S.fict&&!POOLED_ALL;   // forced off while pooled, so the box shows what is actually counted
+  $("f-fictional").disabled=POOLED_ALL;
+  $("f-fictional").parentElement.style.opacity=POOLED_ALL?".45":"";
+  $("f-fictional").parentElement.title=POOLED_ALL
+    ? "Pooling every domain counts real people only: a deity's country is where the myth is told, not where anyone was born"
+    : "";
   $("f-deps").checked=S.deps;
   $("f-globallist").checked=S.globallist;
   const rb=[...$("f-metric").children].find(b=>b.dataset.m==="rca");
@@ -980,7 +1229,7 @@ function syncControls(){
   }
   [...es.children].forEach((c,j)=>c.setAttribute("aria-pressed",(S.lo===null&&j===S.era)?"true":"false"));
   if(S.lo!==null){ $("f-lo").value=S.lo; $("f-hi").value=S.hi; }
-  try{ sessionStorage.setItem("atlas",JSON.stringify(Object.assign({_v:STATE_V},S))); }catch(e){}
+  if(!DAILY) try{ sessionStorage.setItem("atlas",JSON.stringify(Object.assign({_v:STATE_V},S))); }catch(e){}
 }
 function profileFor(g){
   // RCA of one group across every field (current window) and across every era (all fields)
@@ -1052,6 +1301,7 @@ function renderProfile(g){
 }
 function render(){
   if(S.sel!==null&&S.sel!==undefined&&hideDep(S.sel)) S.sel=null;
+  POOLED_ALL = fixSet().size>=F.length;          // before syncControls: it reads this to lock RCA and fictional
   syncControls();
   let C=compute();
   if(POOLED_ALL){
@@ -1065,16 +1315,17 @@ function render(){
     if(!SCALEMAX) SCALEMAX=1;
   }
   { const [wa2,wb2]=win();
-  const eraLbl = S.lo!==null ? `${wa2}\u2013${wb2}` : ERAS[S.era][0]==="All" ? "All eras" : ERAS[S.era][0];
-  $("m-field").textContent = `${curLabel()} \u00b7 ${eraLbl} \u00b7 ${MLBL()==="per capita"?"per capita":MLBL()}`; }
+  const eraLbl = S.lo!==null ? `${wa2}\u2013${wb2}` : ERAS[S.era][0]==="All" ? "All eras" : eraName();
+  $("m-field").textContent = DAILY_SECRET ? dailyTitle() : `${curLabel()} \u00b7 ${eraLbl} \u00b7 ${MLBL()==="per capita"?"per capita":MLBL()}`; }
   const ppl=new Set(); let q=0;
   for(const [k,v] of C.cell) q+=v;
   $("s-people").textContent=P.length.toLocaleString();
-  $("s-q").textContent=Math.round(C.T).toLocaleString();
-  $("s-c").textContent=[...C.G.keys()].filter(g=>!hideDep(g)).length.toLocaleString();
+  if(!DAILY_SECRET){ $("s-q").textContent=Math.round(C.T).toLocaleString();
+    $("s-c").textContent=[...C.G.keys()].filter(g=>!hideDep(g)).length.toLocaleString(); }
   $("f-minlbl").textContent=S.min===0?"0 (show empty)":S.min;
   $("scale-note").textContent=S.metric==="rca"?"RCA vs. the country\u2019s own output"
-    :S.metric==="share"?"share of the whole field":"output vs. share of population";
+    :S.metric==="share"?"share of the whole field"
+    :(S.era===0&&S.lo===null)?"output vs. what each era\u2019s population predicted":"output vs. share of population";
 
   // map
   const HDON = S.view==="wld" && Z.k>=HDK && GEO.wldhd;
@@ -1112,7 +1363,7 @@ function render(){
       frag.appendChild(el0); continue; }
     // draw only if it survives the region filter: a diaspora people, or a country/territory
     // that passes rf. Territorial peoples (ENG/SCT/… and CATA/BASQ/QUEB/AFRI) obey geography.
-    if(!((GSET.has(cc)&&!EUR.has(cc)&&!ANGLO.has(cc)&&!TERRP.has(cc))||rfMap(cc))) continue;
+    if(!rfMap(cc)) continue;
     const st=statFor(C,cc), ok=st&&(S.min===0?st.n>0:st.n>=S.min);
     const isZero0 = S.min===0 && st && st.n===0;
     const el=document.createElementNS("http://www.w3.org/2000/svg","path");
@@ -1126,7 +1377,7 @@ function render(){
       el.addEventListener("click",()=>{S.sel=cc;render();});
       el.addEventListener("mousemove",ev=>{
         const r=svg.parentElement.getBoundingClientRect();
-        tip.innerHTML = st.n===0 ? `<b>${NAME(cc)}</b><br>${st.absent?`no one at all in ${ERAS[S.era][0]}`:`no one in ${curLabel()}`}` : `<b>${NAME(cc)}</b> · ${st.n} ${st.n===1?"person":"people"}<br>${MLBL()} ${MLBL()==="share"?(st.val*100).toFixed(1)+"%":fmt(st.val)} · RCA ${RCAF(st.rca)} · z ${ZF(st.z)}`;
+        tip.innerHTML = st.n===0 ? `<b>${NAME(cc)}</b><br>${st.absent?`no one at all in ${eraName()}`:`no one in ${curLabel()}`}` : `<b>${NAME(cc)}</b> · ${st.n} ${st.n===1?"person":"people"}<br>${MLBL()} ${MLBL()==="share"?(st.val*100).toFixed(1)+"%":fmt(st.val)} · RCA ${RCAF(st.rca)} · z ${ZF(st.z)}`;
         tip.classList.add("on");
         let x=ev.clientX-r.left+13, y=ev.clientY-r.top+13;
         if(x+tip.offsetWidth>r.width) x=ev.clientX-r.left-tip.offsetWidth-13;
@@ -1207,7 +1458,7 @@ function render(){
         el.addEventListener("click",()=>{S.sel=cc;render();});
         el.addEventListener("mousemove",ev=>{
           const r=svg.parentElement.getBoundingClientRect();
-          tip.innerHTML = st.n===0 ? `<b>${NAME(cc)}</b><br>${st.absent?`no one at all in ${ERAS[S.era][0]}`:`no one in ${curLabel()}`}` : `<b>${NAME(cc)}</b> · ${st.n} ${st.n===1?"person":"people"}<br>${MLBL()} ${MLBL()==="share"?(st.val*100).toFixed(1)+"%":fmt(st.val)} · RCA ${RCAF(st.rca)} · z ${ZF(st.z)}`;
+          tip.innerHTML = st.n===0 ? `<b>${NAME(cc)}</b><br>${st.absent?`no one at all in ${eraName()}`:`no one in ${curLabel()}`}` : `<b>${NAME(cc)}</b> · ${st.n} ${st.n===1?"person":"people"}<br>${MLBL()} ${MLBL()==="share"?(st.val*100).toFixed(1)+"%":fmt(st.val)} · RCA ${RCAF(st.rca)} · z ${ZF(st.z)}`;
           tip.classList.add("on");
           let x=ev.clientX-r.left-tip.offsetWidth-13, y=ev.clientY-r.top-tip.offsetHeight-13;
           tip.style.left=Math.max(4,x)+"px"; tip.style.top=Math.max(4,y)+"px";
@@ -1236,10 +1487,12 @@ function render(){
       for(const d of Object.values(GC.p)){ const m=d.match(/-?[0-9.]+/g)||[];
         for(let i=0;i+1<m.length;i+=2){ const x=+m[i],y=+m[i+1]; if(x>20&&x<980) upd(x,y); } }
       for(const ce of Object.values(GC.c||{})) upd(ce[0],ce[1]);
-      let w=x1-x0,h=y1-y0; const cx=(x0+x1)/2,cy=(y0+y1)/2;
-      if(w/h>A) w=h*A; else h=w/A;               // crop the wider dimension to the Levant aspect
+      let w=x1-x0,h=y1-y0; const cx=(x0+x1)/2,cy=(y0+y1)/2, wide=w/h>A;
+      if(wide) w=h*A; else h=w/A;                  // crop the wider dimension to the Levant aspect
       w*=1.06; h*=1.06;                            // small breathing margin
-      ins2.setAttribute("viewBox",`${(cx-w/2).toFixed(1)} ${(cy-h/2).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`); }
+      // the region is wide: anchor the window on its EAST edge so the Lesser Antilles stay in frame and Cuba runs off the west side
+      const vx=wide?(x1+0.03*w)-w:cx-w/2;
+      ins2.setAttribute("viewBox",`${vx.toFixed(1)} ${(cy-h/2).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`); }
     const f3=document.createDocumentFragment();
     const carEntries=[];
     for(const [cc,d] of Object.entries(GC.p)) carEntries.push([(remapG&&PMAP[cc])?PMAP[cc]:cc,d]);
@@ -1301,7 +1554,10 @@ function render(){
     wl.innerHTML="<b>RCA is switched off here.</b> With every domain pooled, a country's share of "
       +"the selection equals its share of everything, so RCA is 1.00 for all 187 groups by definition "
       +"and z is 0. Per capita and Share still work — they compare output against population and "
-      +"against the world total, not against the country's own baseline.";
+      +"against the world total, not against the country's own baseline."
+      +"<br><b>Legendary and fictional figures are left out here.</b> A deity or a character is "
+      +"placed where its story is told, not where anyone was born, so pooling every domain would let "
+      +"mythology decide the ranking. Pick Mythology, or any single domain, to count them again.";
     $("th-rca").style.opacity=".4";
   } else { $("th-rca").style.opacity=""; }
   const natdef = !POOLED_ALL && (/^Literature/.test(lbl)||lbl==="History"||lbl==="Religion"||lbl==="Mythology"||lbl==="Geography");
@@ -1349,7 +1605,21 @@ function render(){
     th.classList.toggle("asc",th.dataset.k===S.sortK&&S.sortAsc);
   });
   const needle=(S.find||"").trim().toLowerCase();
-  const shown=needle?rows.filter(([g,st])=>g.toLowerCase().includes(needle)||NAME(g).toLowerCase().includes(needle)):rows;
+  let shown=needle?rows.filter(([g,st])=>g.toLowerCase().includes(needle)||NAME(g).toLowerCase().includes(needle)):rows;
+  const SHOT=document.body.classList.contains("shot");
+  RANKALL=shown.filter(([,st])=>st.n>=SHOT_MIN);   // the card renders from this, not from the trimmed DOM
+  if(SHOT) shown=RANKALL.slice(0,SHOT_ROWS);
+  // caption and credit: a crop of this table has none of the page's own context around it
+  { const meas=S.metric==="percap"?"per capita":S.metric==="rca"?"RCA":"share of world total";
+    const era=S.lo!==null?`${win()[0]}–${win()[1]}`:(ERAS[S.era][0]==="All"?"all eras":eraName());
+    // the region has to be in the caption: a crop that silently drops the rest of the world is a lie
+    const rsel=$("f-region"), rlab=S.region==="all"?"":(rsel.options[rsel.selectedIndex]||{}).text;
+    $("rankcap").textContent=`${curLabel()} · ${era} · ${meas}`+(rlab?` · ${rlab.toLowerCase()}`:"");
+    $("rankwrap").classList.toggle("nodegen",POOLED_ALL);   // RCA and z are constant when pooled
+    const nq=rows.filter(([,st])=>st.n>=SHOT_MIN).length, nlow=rows.length-nq;
+    $("rankfootnote").textContent=`Top ${Math.min(SHOT_ROWS,nq)} of ${nq}`
+      +(nlow?`; ${nlow} group${nlow===1?"":"s"} under ${SHOT_MIN} people not shown`:"");
+  }
   const tb=$("rank"); tb.innerHTML="";
   if(needle&&!shown.length) tb.innerHTML='<tr><td colspan="8" class="empty-note">Nothing matches \u201c'+needle+'\u201d at the current filters.</td></tr>';
   for(const [g,st] of shown){
@@ -1357,6 +1627,8 @@ function render(){
     tr.setAttribute("aria-selected",S.sel===g?"true":"false");
     if(GSET.has(g)) tr.classList.add("anc");
     if(st.n<5) tr.classList.add("thinrow");
+    if(st.n<SHOT_MIN) tr.classList.add("lowrow");   // dropped in screenshot view: Saint Lucia on 4 people
+                                                    // outranking Greece is an artefact, not a finding
     if(st.n===0) tr.classList.add("zerorow");
     const pcCol=(st.percap??1)>=1?'var(--pos)':'var(--neg)';
     const rcCol=st.rca>=1?'var(--pos)':'var(--neg)';
@@ -1442,11 +1714,12 @@ function render(){
   if(!list.length){ box.innerHTML='<div class="empty-note">No figures match these filters.</div>'; return; }
   let rank=0;
   for(const [i,w] of list){ rank++; box.appendChild(figEl(i,w,rank,false)); }
+  if(PANEL_LAST!==S.sel){ PANEL_LAST=S.sel; for(const el of [box,$("p-metrics"),$("p-verdict")]){ el.classList.remove("arrive"); void el.offsetWidth; el.classList.add("arrive"); } }
 }
 function figEl(i,w,rank,withCountry){
   const p=P[i];
   const el=document.createElement("div");
-  el.className="fig"; el.dataset.pi=i;
+  el.className="fig"+(S.hl===i?" hl":""); el.dataset.pi=i;   // the person found by search stays marked
   const dd=p[15]===-1?"–":(p[15]===null||p[15]===undefined?"":"–"+p[15]);
   const hasB=p[4]!==null&&p[4]!==undefined;
   // no "?" placeholder: an unknown birth year shows nothing (or "d. 1970" when only the death is known)
@@ -1518,9 +1791,14 @@ function fillFields(){
 }
 buildSel(); S.field=Math.max(0,SEL.findIndex(o=>o.label==="Auditory Fine Arts")); fillFields();
 (function(){
-  if(!/claude\.ai$/.test(location.hostname) && /\/atlas\.html$/.test(location.pathname)) { const pl=$("playlink"); if(pl) pl.style.display=""; }   // only on the game site, where "/" is the game (not stevie.art/atlas/)
-  const hSel=HASHP.get("sel"), hDom=HASHP.get("domain"), hEra=HASHP.get("era");
-  if(hDom){ const k=SEL.findIndex(o=>o.label.toLowerCase()===hDom.toLowerCase()); if(k>=0){ S.field=k; fs.value=SEL[k].label; } }
+  if(!/claude\.ai$/.test(location.hostname) && (/\/atlas\.html$/.test(location.pathname)||DAILY)) { const pl=$("playlink"); if(pl) pl.style.display=""; }
+  else { const dl=$("dailylink"); if(dl) dl.style.display="none"; }   // the Daily link belongs to the game site only, like Play   // only on the game site, where "/" is the game (not stevie.art/atlas/)
+  const hSel=DAILY?null:HASHP.get("sel"), hDom=DAILY?null:HASHP.get("domain"), hEra=DAILY?null:HASHP.get("era");
+  if(hDom){ const h=hDom.toLowerCase();                                   // a display label, a raw field name, or a field shown only inside an aggregate
+    let k=SEL.findIndex(o=>o.label.toLowerCase()===h);
+    if(k<0) k=SEL.findIndex(o=>o.ix.length===1&&F[o.ix[0]].toLowerCase()===h);
+    if(k<0) k=SEL.findIndex(o=>o.agg&&o.ix.some(i=>F[i].toLowerCase()===h));
+    if(k>=0){ S.field=k; fs.value=SEL[k].label; } }
   if(hEra){ const e=ERAS.findIndex(x=>x[0].toLowerCase()===hEra.toLowerCase()); if(e>=0) S.era=e; }
   if(hSel) S.sel=hSel.toUpperCase();
 })();
@@ -1630,6 +1908,232 @@ $("f-fictional").onchange=e=>{S.fict=e.target.checked;render();};
 $("f-deps").onchange=e=>{S.deps=e.target.checked;render();};
 $("f-globallist").onchange=e=>{S.globallist=e.target.checked;render();};
 $("f-min").oninput=e=>{S.min=+e.target.value;render();};
+
+// ---------------- map image export ----------------
+// A 2x PNG of the map with a title, for posting. The title follows the research-chart rule: it states
+// what is plotted (metric, population, span) and never argues. Qualifiers and the colour key go in the
+// subtitle (Stevie, Oct 11 2026).
+function mapTitleText(){
+  const meas = S.metric==="percap" ? "per capita"
+             : S.metric==="rca"    ? "specialisation"
+             : "world share";
+  // "Trivia" in the title because "quizbowl" means nothing to a reader outside it; the domain keeps its
+  // real quizbowl category name, and the subtitle and credit still say where the data comes from.
+  const dom  = POOLED_ALL ? "Trivia questions"
+                          : `${disp(curLabel())} trivia questions`;
+  const era  = S.lo!==null ? `${win()[0]}–${win()[1]}`
+             : (ERAS[S.era][0]==="All" ? "all eras" : eraName().toLowerCase());
+  return `${dom} ${meas}, by country, ${era}`;
+}
+function rankSubTitle(){
+  const rsel=$("f-region"), reg=S.region==="all"?"":(rsel.options[rsel.selectedIndex]||{}).text;
+  const place = S.basis==="birth" ? "placed by birthplace"
+              : S.basis==="nat"   ? "placed by nationality" : "placed by where they worked";
+  return `${$("s-people").textContent} people the quizbowl canon asks about, ${place}.`+(reg?` ${reg}.`:"");
+}
+function mapSubTitle(){
+  const rsel=$("f-region"), reg=S.region==="all"?"":(rsel.options[rsel.selectedIndex]||{}).text;
+  const key = S.metric==="share" ? "Darker is a larger share of the world total."
+            : S.metric==="rca" ? "Orange means a country looms larger here than in its output overall, blue smaller."
+            : "Orange is above the average rate, blue below.";
+  // s-people is P.length, fixed. The header's "Questions" figure is NOT a question count and NOT fixed:
+  // render() sets it to C.T, the summed canon weight of whatever is currently filtered, so quoting it
+  // as "questions asked since 2000" would put a false number on a published image.
+  const place = S.basis==="birth" ? "placed by birthplace"
+              : S.basis==="nat"   ? "placed by nationality"
+              : "placed by where they worked";
+  return `${$("s-people").textContent} people the quizbowl canon asks about, ${place}. ${key}`
+       + (reg?` ${reg}.`:"");
+}
+
+// X crops to the slot, so render to the slot (chart-post skill): one image is 16:9, a pair is 7:8 each.
+const CARD={wide:[2600,1460], tile:[2100,2400]};
+function cardBase(W,H){
+  const css=getComputedStyle(document.body);
+  const c=document.createElement("canvas"); c.width=W; c.height=H;
+  const x=c.getContext("2d");
+  const P={BG:css.getPropertyValue("--bg").trim()||"#faf8f3", INK:css.getPropertyValue("--ink").trim()||"#1a1a1a",
+           INK2:css.getPropertyValue("--ink-2").trim()||"#444", INK3:css.getPropertyValue("--ink-3").trim()||"#777",
+           RULE:css.getPropertyValue("--rule").trim()||"#b9b2a0", LINE:css.getPropertyValue("--line").trim()||"#ddd8ca",
+           SERIF:css.fontFamily||"Georgia,serif"};
+  x.fillStyle=P.BG; x.fillRect(0,0,W,H); x.textBaseline="top";
+  return {c,x,P};
+}
+function wrapLines(x,t,max){ const out=[]; let ln="";
+  for(const w of t.split(" ")){ const tst=ln?ln+" "+w:w;
+    if(x.measureText(tst).width>max&&ln){out.push(ln);ln=w;} else ln=tst; }
+  if(ln) out.push(ln); return out; }
+// title + subtitle at the top of a card; returns the y the body can start at
+function cardHead(x,P,W,pad,s,sub){
+  const tp=Math.round(s*52), sp=Math.round(s*30);
+  let y=pad;
+  x.fillStyle=P.INK; x.font=`600 ${tp}px ${P.SERIF}`;
+  for(const ln of wrapLines(x,mapTitleText(),W-pad*2)){ x.fillText(ln,pad,y); y+=Math.round(tp*1.18); }
+  y+=Math.round(s*8); x.fillStyle=P.INK3; x.font=`italic ${sp}px ${P.SERIF}`;
+  for(const ln of wrapLines(x,sub===undefined?mapSubTitle():sub,W-pad*2)){ x.fillText(ln,pad,y); y+=Math.round(sp*1.32); }
+  return y;
+}
+function cardFoot(x,P,W,H,pad,s,withRamp){
+  const fy=H-pad-Math.round(s*26), fp=Math.round(s*24);
+  x.font=`600 ${fp}px ${P.SERIF}`; x.fillStyle=P.INK3;
+  if(withRamp){
+    const sw=[...$("ramp").children].map(i=>getComputedStyle(i).backgroundColor);
+    const lo=$("scale-lo").textContent.toUpperCase(), hi=$("scale-hi").textContent.toUpperCase();
+    x.fillText(lo,pad,fy+Math.round(s*6));
+    const rx=pad+x.measureText(lo).width+Math.round(s*18), rw=Math.round(s*520), bw=rw/Math.max(1,sw.length);
+    sw.forEach((col,i)=>{ x.fillStyle=col; x.fillRect(rx+i*bw,fy,bw+1,Math.round(s*26)); });
+    x.fillStyle=P.INK3; x.fillText(hi,rx+rw+Math.round(s*18),fy+Math.round(s*6));
+  }
+  x.font=`italic ${fp}px ${P.SERIF}`;
+  const cred="Made by Stevie Miller · quizbowl canon via qbreader · infovore.art";
+  x.fillText(cred,W-pad-x.measureText(cred).width,fy+Math.round(s*6));
+}
+// Serialise an on-page SVG with its computed paint baked in: the page's strokes come from CSS, which
+// does not survive serialisation, so every path carries its own fill and stroke in the copy.
+function svgToURL(src){
+  const clone=src.cloneNode(true);
+  clone.setAttribute("xmlns","http://www.w3.org/2000/svg");
+  const a=[...src.querySelectorAll("path,circle,rect")], b=[...clone.querySelectorAll("path,circle,rect")];
+  a.forEach((el,i)=>{ const cs=getComputedStyle(el), t=b[i]; if(!t) return;
+    t.setAttribute("fill",cs.fill);
+    if(cs.stroke&&cs.stroke!=="none"){ t.setAttribute("stroke",cs.stroke);
+      t.setAttribute("stroke-width",cs.strokeWidth); t.setAttribute("stroke-linejoin","round"); }
+    t.removeAttribute("class");
+  });
+  const vb=src.getAttribute("viewBox")||"";
+  return {url:"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(clone)),
+          vb:vb.split(/\s+/).map(Number)};
+}
+const loadImg=u=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=u;});
+
+async function mapCard(W,H){
+  // never export the selection outline: a clicked country came out with a purple border on the posted
+  // map and a reader asked what was going on with the Netherlands (Oct 11 2026)
+  const hadSel=S.sel; if(hadSel!==null&&hadSel!==undefined){ S.sel=null; render(); }
+  try{ return await mapCardInner(W,H); }
+  finally{ if(hadSel!==null&&hadSel!==undefined){ S.sel=hadSel; render(); } }
+}
+async function mapCardInner(W,H){
+  const s=W/2400, pad=Math.round(72*s);
+  const {c,x,P}=cardBase(W,H);
+  const top=cardHead(x,P,W,pad,s);
+  const footTop=H-pad-Math.round(s*70);
+  const boxW=W-pad*2, boxH=footTop-top-Math.round(s*20);
+
+  const main=svgToURL($("map")), img=await loadImg(main.url);
+  const ar=main.vb[2]/main.vb[3];
+  let mw=boxW, mh=mw/ar;
+  if(mh>boxH){ mh=boxH; mw=mh*ar; }
+  const mx=Math.round(pad+(boxW-mw)/2), my=Math.round(top+Math.round(s*20)+(boxH-mh)/2);
+  x.drawImage(img,mx,my,mw,mh);
+
+  // insets, placed proportionally inside the drawn map
+  const wrapEl=$("map").parentElement, wr=wrapEl.getBoundingClientRect(), sc=mw/wr.width;
+  for(const el of wrapEl.querySelectorAll(".inset")){
+    if(getComputedStyle(el).display==="none") continue;
+    const sv=el.querySelector("svg"); if(!sv||!sv.getAttribute("viewBox")) continue;
+    const r=el.getBoundingClientRect(), iw=Math.round(r.width*sc), ih=Math.round(r.height*sc);
+    const ix=mx+(r.left-wr.left)*sc, iy=my+(r.top-wr.top)*sc;
+    try{ const ii=await loadImg(svgToURL(sv).url);
+      x.fillStyle=P.BG; x.fillRect(ix,iy,iw,ih);
+      x.strokeStyle=P.RULE; x.lineWidth=Math.max(1,Math.round(2*s)); x.strokeRect(ix+1,iy+1,iw-2,ih-2);
+      x.drawImage(ii,ix,iy,iw,ih*0.86);
+      const lbl=el.querySelector(".inset-lbl");
+      if(lbl){ x.fillStyle=P.INK3; x.font=`600 ${Math.round(20*s)}px ${P.SERIF}`;
+        x.fillText(lbl.textContent.trim(),ix+Math.round(10*s),iy+ih-Math.round(30*s)); }
+    }catch(e){}
+  }
+  cardFoot(x,P,W,H,pad,s,true);
+  return new Promise(r=>c.toBlob(r,"image/png"));
+}
+
+// The ranking as an image. A narrow tile cannot carry eight columns, so it keeps the three that
+// matter: who, the metric, and the sample size behind it.
+function rankCard(W,H){
+  const s=W/2400, pad=Math.round(72*s);
+  const {c,x,P}=cardBase(W,H);
+  let y=cardHead(x,P,W,pad,s,rankSubTitle())+Math.round(s*26);
+
+  // Ten rows and four columns. The full 39-row, eight-column table is unreadable as an image and
+  // reads as intimidating rather than informative (Stevie, Oct 11 2026).
+  const ROWS=10;
+  const fmtPop=v=>v?(v>=1?v.toFixed(1)+"M":(v*1000).toFixed(0)+"k"):"—";
+  const fmtWt=v=>v>=10?v.toFixed(0):v.toFixed(1);
+  const COLS=[{h:"WEIGHT",     off:980, get:st=>fmtWt(st.obs)},
+              {h:"POPULATION", off:640, get:st=>fmtPop(st.pop)},
+              {h:"SHARE",      off:300, get:st=>(st.share*100).toFixed(1)+"%"},
+              {h:"PER CAPITA", off:0,   get:st=>fmt(st.percap)}];
+  const cx=o=>W-pad-Math.round(s*o);
+
+  const hp=Math.round(s*26);
+  x.font=`600 ${hp}px ${P.SERIF}`; x.fillStyle=P.INK3;
+  x.fillText("COUNTRY",pad,y);
+  x.textAlign="right"; for(const col of COLS) x.fillText(col.h,cx(col.off),y); x.textAlign="left";
+  y+=Math.round(s*42);
+  x.strokeStyle=P.RULE; x.lineWidth=Math.max(1,Math.round(1.5*s));
+  x.beginPath(); x.moveTo(pad,y); x.lineTo(W-pad,y); x.stroke(); y+=Math.round(s*20);
+
+  const footY=H-pad-Math.round(s*80), avail=footY-y;
+  const take=Math.min(ROWS,RANKALL.length);
+  // cap the pitch, then centre the block: dividing the whole card by ten rows left 200px gaps and
+  // floated each rule away from the row it belongs to
+  const rowH=Math.max(Math.round(s*86),Math.min(Math.round(s*150),Math.floor(avail/Math.max(1,take))));
+  const np=Math.min(Math.round(s*52),Math.round(rowH*0.42));
+  y+=Math.max(0,Math.floor((avail-rowH*take)/2));
+  for(const [g,st] of RANKALL.slice(0,take)){
+    const label=NAME(g)===g?"":NAME(g);
+    x.fillStyle=P.INK; x.font=`600 ${np}px ${P.SERIF}`; x.fillText(g,pad,y);
+    const wNm=x.measureText(g).width;
+    x.fillStyle=P.INK2; x.font=`${np}px ${P.SERIF}`; x.fillText(label,pad+wNm+Math.round(s*16),y);
+    x.textAlign="right";
+    for(const col of COLS){
+      const last=col.off===0;
+      x.fillStyle=last?P.INK:P.INK3;
+      x.font=`${last?"600 ":""}${np}px ${P.SERIF}`;
+      x.fillText(col.get(st),cx(col.off),y);
+    }
+    x.textAlign="left";
+    const ly=y+np+Math.round(s*22);
+    x.strokeStyle=P.LINE; x.lineWidth=1;
+    x.beginPath(); x.moveTo(pad,ly); x.lineTo(W-pad,ly); x.stroke();
+    y+=rowH;
+  }
+  const note=`Top ${take} of ${RANKALL.length}; groups under ${SHOT_MIN} people not shown`;
+  x.fillStyle=P.INK3; x.font=`${Math.round(s*26)}px ${P.SERIF}`; x.fillText(note,pad,footY+Math.round(s*6));
+  cardFoot(x,P,W,H,pad,s,false);
+  return new Promise(r=>c.toBlob(r,"image/png"));
+}
+
+
+// one copy path for every card button: render, put a PNG on the clipboard, fall back to a download
+function wireCopy(id,make,dims){
+  const btn=$(id); if(!btn) return;
+  btn.onclick=async()=>{
+    const was=btn.textContent; btn.textContent="rendering\u2026"; btn.disabled=true;
+    try{
+      const blob=await make(dims[0],dims[1]);
+      if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+        await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
+        btn.textContent="copied";
+      }else{
+        const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+        a.download=id.includes("rank")?"atlas-ranking.png":"atlas-map.png"; a.click(); URL.revokeObjectURL(a.href);
+        btn.textContent="downloaded";
+      }
+    }catch(e){ btn.textContent="failed"; console.error(e); }
+    btn.disabled=false; setTimeout(()=>{btn.textContent=was;},2400);
+  };
+}
+wireCopy("f-mapimg",  mapCard,  CARD.wide);
+wireCopy("f-mapimg2", mapCard,  CARD.tile);
+wireCopy("f-rankimg", rankCard, CARD.wide);
+wireCopy("f-rankimg2",rankCard, CARD.tile);
+$("f-shot").onclick=()=>{ const on=!document.body.classList.contains("shot");
+  document.body.classList.toggle("shot",on); $("f-shot").classList.toggle("on",on);
+  $("f-shot").textContent=on?"Exit screenshot view":"Screenshot view";
+  if(on&&S.find){ S.find=""; $("f-find").value=""; }
+  render();                                  // the row filter lives in the render, not in CSS
+  $("rankshell").scrollIntoView({behavior:"smooth",block:"start"}); };
 let REC=null, RECSORT="share", RECKEY="";
 function recKey(){ return JSON.stringify([S.anc,S.role,S.basis,S.dual,S.region,S.conf,S.mentonly,S.fict,S.deps,S.inferred,S.fieldbasis,S.erabasis]); }
 function computeRecords(){                 // synchronous path for tests; UI uses the async version
@@ -1654,7 +2158,7 @@ function recordStep(j,rows){
   for(const g of C.G.keys()){
     if(hideDep(g)) continue;
     const st=statFor(C,g);
-    if(!st||st.n<8||st.obs<40) continue;
+    if(!st||st.n<8||st.obs<40*WSCALE()) continue;   // 40 was set on the unweighted build; WSCALE keeps it there as the weighting changes
     let top="", tw=0;
     for(const [pi,w] of (C.members.get(g)||[])) if(w>tw){ tw=w; top=P[pi][0]; }
     rows.push({g,fi:j.i,f:j.label,e:j.e,era:ERAS[j.e][0],share:st.share,z:st.z,percap:st.percap,
@@ -1697,17 +2201,16 @@ function renderRecordsRows(rows){
   for(const tr of $("recbody").querySelectorAll("tr[data-ri]")){
     tr.onclick=()=>{ const r=window.__recTop[+tr.dataset.ri];
       S.field=r.fi; fs.value=SEL[r.fi].label; S.era=r.e; S.lo=null; S.hi=null; S.sel=r.g;
-      $("records").classList.remove("on"); $("recbtn").setAttribute("aria-expanded","false");
+      $("records").classList.remove("on"); const _rb=$("recbtn"); if(_rb) _rb.setAttribute("aria-expanded","false");
       render(); };
   }
 }
-$("recbtn").onclick=()=>{
+if($("recbtn")){ $("recbtn").onclick=()=>{
   const d=$("records"), on=d.classList.toggle("on");
   $("recbtn").setAttribute("aria-expanded",on?"true":"false");
   if(on){ renderRecords();
     d.scrollIntoView({behavior:"smooth",block:"nearest"}); }
-};
-$("recbtn").setAttribute("aria-expanded","false");
+}; $("recbtn").setAttribute("aria-expanded","false"); }
 (function(){ const el=$("recsort");
   [...el.children].forEach(b=>b.onclick=()=>{
     RECSORT=b.dataset.rs;
@@ -1738,7 +2241,7 @@ matchMedia("(prefers-color-scheme:dark)").addEventListener("change",render);
     const p=P[i];
     const fi=(p[9]&&p[9].length)?p[9][0]:null;
     if(fi!=null){ const k=selIndexFor(fi); if(k>=0){ S.field=k; fs.value=SEL[k].label; } }
-    S.era=0; S.lo=null; S.hi=null; S.sel=p[1]; S.min=0;
+    S.era=0; S.lo=null; S.hi=null; S.sel=p[1]; S.min=0; S.hl=i;
     close();
     render();
     flash(i,p);
@@ -1746,7 +2249,8 @@ matchMedia("(prefers-color-scheme:dark)").addEventListener("change",render);
   function flash(i,p){
     let card=$("p-figs").querySelector('.fig[data-pi="'+i+'"]');
     if(!card && S.role!=="all"){ S.role="all"; syncControls&&syncControls(); render(); card=$("p-figs").querySelector('.fig[data-pi="'+i+'"]'); }
-    if(card){ card.classList.add("flash"); card.scrollIntoView({behavior:"smooth",block:"center"});
+    if(card){ $("p-figs").querySelectorAll(".fig.hl").forEach(c=>c.classList.remove("hl")); card.classList.add("hl");   // the list may not have been rebuilt: move the mark by hand
+      card.classList.add("flash"); card.scrollIntoView({behavior:"smooth",block:"center"});
       setTimeout(()=>card.classList.remove("flash"),1700); }
     else { const wl=$("warn"); if(wl){ wl.classList.add("on");
       wl.innerHTML='<b>'+esc(p[0])+'</b> is '+(NAME(p[1])||p[1])+', '+(p[17]||'in the canon')+
@@ -1758,9 +2262,8 @@ matchMedia("(prefers-color-scheme:dark)").addEventListener("change",render);
     const starts=[], has=[];
     for(const [nm,i,w] of IDX){
       const at=nm.indexOf(nq);
-      if(at===0) starts.push([i,w]);
+      if(at===0||(at>0&&nm[at-1]===" ")) starts.push([i,w]);   // a surname counts as a start: "bach" finds Johann Sebastian Bach before Bachir Gemayel
       else if(at>0) has.push([i,w]);
-      if(starts.length>60) break;
     }
     starts.sort((a,b)=>b[1]-a[1]); has.sort((a,b)=>b[1]-a[1]);
     results=starts.concat(has).slice(0,12);
@@ -1778,7 +2281,7 @@ matchMedia("(prefers-color-scheme:dark)").addEventListener("change",render);
   }
   function close(){ MENU.classList.remove("on"); }
   IN.addEventListener("input",()=>render_results(IN.value));
-  IN.addEventListener("focus",()=>{ if(results.length) MENU.classList.add("on"); });
+  IN.addEventListener("focus",()=>{ IN.select(); if(results.length) MENU.classList.add("on"); });   // a new name replaces the last one instead of being appended to it
   IN.addEventListener("keydown",e=>{
     if(!results.length) return;
     if(e.key==="ArrowDown"){ e.preventDefault(); hi=(hi+1)%results.length; paintHi(); }
@@ -1791,7 +2294,7 @@ matchMedia("(prefers-color-scheme:dark)").addEventListener("change",render);
 })();
 
 try{
-  const saved=JSON.parse(sessionStorage.getItem("atlas")||"null");
+  const saved=DAILY?null:JSON.parse(sessionStorage.getItem("atlas")||"null");
   if(saved&&typeof saved==="object"&&saved._v===STATE_V){
     for(const k of ["era","lo","hi","metric","tab","sortK","sortAsc","basis",
                     "dual","anc","erabasis","fieldbasis","inferred","role","region","multi","conf","min","view","sel"])
@@ -1801,7 +2304,306 @@ try{
   }
 }catch(e){}
 if(S.sel===null||S.sel===undefined) S.sel="NL";
-render();
+// ===================== Daily Atlas: one hidden era x domain a day, five guesses =====================
+// The map is the clue. Each guess names an era and a domain and comes back marked: the era exact or
+// pointing earlier/later, the domain exact, in the right family, or wrong. Same puzzle for everyone on
+// the Eastern calendar; the schedule is the fixed shuffle in daily_pool.json.
+const DAILY_EPOCH=Date.UTC(2026,8,20), DAILY_MAX=5;
+let DP=null;                                              // today's puzzle and the guesses made so far
+const etParts=()=>Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",hour12:false,
+  year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+function etDayNumber(){ const p=etParts(); return Math.round((Date.UTC(+p.year,+p.month-1,+p.day)-DAILY_EPOCH)/86400000); }
+function msToEtMidnight(){ const p=etParts(); return 86400000-((+p.hour%24)*3600+(+p.minute)*60+(+p.second))*1000; }
+const DFAM=o=>o.agg?({Literature:"Literature",Music:"Fine arts"}[o.label]||"Pop culture"):FAMILY(o);
+function dailyTitle(){ return DP&&DP.practice?"Practice Atlas":`Daily Atlas · No. ${DP?DP.n:"…"}`; }
+const dLoad=()=>{ try{ return JSON.parse(localStorage.getItem("atlas_daily")||"{}"); }catch{ return {}; } };
+const dSave=o=>{ try{ localStorage.setItem("atlas_daily",JSON.stringify(o)); }catch{} };
+
+async function dailyBoot(){
+  document.body.classList.add("daily","secret"); document.title="Daily Atlas";
+  { const dl=$("dailylink"); if(dl){ dl.textContent="Atlas \u2192"; dl.href="atlas.html"; } }
+  const practice=/[?&]practice/.test(location.search);
+  const [pool,auth]=await Promise.all([fetch("daily_pool.json",{cache:"no-cache"}).then(r=>r.json()),
+                                       fetch("/auth/me").then(r=>r.json()).catch(()=>({}))]);
+  { S.era=0; const C0=compute(); $("s-q").textContent=Math.round(C0.T).toLocaleString();      // all-eras totals, so the header gives nothing away
+    $("s-c").textContent=[...C0.G.keys()].filter(g=>!hideDep(g)).length.toLocaleString(); }
+  const pz=pool.puzzles, n=practice?1+Math.floor(Math.random()*pz.length):etDayNumber()+1;
+  const pick=pz[((n-1)%pz.length+pz.length)%pz.length];
+  DP={n,practice,era:pick.era,field:SEL.findIndex(o=>o.label===pick.field),label:pick.field,
+      domains:pool.domains,guesses:[],done:false,won:false,user:auth.user||null,authOn:!!auth.configured};
+  DP.key=pick.era+"|"+pick.field;                       // stored progress only counts for this exact puzzle, so a pool change never shows stale guesses
+  if(!practice){ const st=dLoad(); if(st.cur&&st.cur.n===n&&st.cur.key===DP.key){ DP.guesses=st.cur.guesses||[]; DP.done=!!st.cur.done; DP.won=!!st.cur.won; } }
+  DAILY_SECRET=!DP.done;
+  Object.assign(S,{era:DP.era,field:DP.field,metric:"percap",erabasis:"life",lo:null,hi:null,multi:null,sel:null,view:"wld",lens:false,min:0});
+  dailyPanel(); dailyPaint(); render();
+  if(DP.done) dailyReveal();
+  setTimeout(()=>document.body.classList.add("moving"),80);
+}
+function dailyPanel(){
+  const d=$("dpanel"); d.hidden=false; $("d-lock").hidden=false;
+  d.innerHTML=`<div class="cellhead"><div class="who" id="d-title"></div>
+      <div class="what">Which era and domain is this map? Per capita, alive during the era. ${DAILY_MAX} guesses.</div></div>
+    <div id="d-auth"></div>
+    <div class="ctl"><span class="lbl">Era</span><div class="seg" id="d-era">${ERAS.slice(1).map((e,i)=>`<button data-e="${i+1}" aria-pressed="false">${e[0]}</button>`).join("")}</div></div>
+    <div class="ctl"><span class="lbl">Domain</span><div class="combo" id="d-dom-combo"><input id="d-dom" type="text" autocomplete="off" spellcheck="false" placeholder="type a domain…"><div id="d-dom-menu" class="combomenu"></div></div></div>
+    <button id="d-go" disabled>Guess</button>
+    <div id="d-rows"></div>
+    <div class="dkey">Era: green is right, an arrow says the answer is earlier or later. Domain: green is right, gold is the right family (sciences, literature, fine arts, social science, humanities, pop culture).</div>
+    <div id="d-end" hidden></div>`;
+  $("d-title").textContent=dailyTitle(); dailyAuth();
+  let gEra=null, gDom=null;
+  const sync=()=>{ $("d-go").disabled=DP.done||gEra===null||!gDom; };
+  [...$("d-era").children].forEach(b=>b.onclick=()=>{ gEra=+b.dataset.e; [...$("d-era").children].forEach(c=>c.setAttribute("aria-pressed",c===b?"true":"false")); sync(); });
+  $("d-go").onclick=()=>{ if(DP.done) return; dailyGuess(gEra,gDom);
+    const last=DP.guesses[DP.guesses.length-1]; if(last&&last.d!=="ok"){ gDom=null; $("d-dom").value=""; }
+    sync(); if(!DP.done) $("d-dom").focus(); };
+  // the domain box: type to filter, arrows to move, Enter to pick; Enter again submits the guess
+  (function(){
+    const inp=$("d-dom"), menu=$("d-dom-menu"); let hi=-1, items=[];
+    const byLabel=l=>SEL[SEL.findIndex(o=>o.label===l)];
+    function build(q){
+      const nq=(q||"").trim().toLowerCase(), buckets=new Map(FAMORDER.map(k=>[k,[]]));
+      for(const l of DP.domains) if(!nq||l.toLowerCase().includes(nq)) buckets.get(DFAM(byLabel(l))).push(l);
+      let html=""; items=[];
+      for(const fam of FAMORDER){ const rows=buckets.get(fam); if(!rows||!rows.length) continue;
+        html+='<div class="grp">'+fam+'</div>';
+        for(const l of rows){ const k=items.length; items.push(l); html+='<div class="opt'+(l===gDom?' cur':'')+'" data-k="'+k+'">'+l+'</div>'; } }
+      if(!items.length) html='<div class="opt" style="color:var(--ink-3)">no domain matches</div>';
+      menu.innerHTML=html; hi=items.length?Math.max(0,items.indexOf(gDom)):-1; paint();
+      [...menu.querySelectorAll(".opt[data-k]")].forEach(el=>el.onmousedown=e=>{ e.preventDefault(); choose(items[+el.dataset.k]); });
+    }
+    const paint=()=>[...menu.querySelectorAll(".opt")].forEach(el=>el.classList.toggle("hi",el.dataset.k!=null&&+el.dataset.k===hi));
+    const ensure=()=>{ const el=menu.querySelector('.opt[data-k="'+hi+'"]'); if(el) el.scrollIntoView({block:"nearest"}); };
+    function place(){ const r=inp.getBoundingClientRect(); menu.style.left=r.left+"px"; menu.style.width=r.width+"px";
+      const below=window.innerHeight-r.bottom;
+      if(below<220&&r.top>below){ menu.style.top="auto"; menu.style.bottom=(window.innerHeight-r.top)+"px"; menu.style.maxHeight=Math.min(r.top-8,420)+"px"; }
+      else { menu.style.bottom="auto"; menu.style.top=r.bottom+"px"; menu.style.maxHeight=Math.min(below-8,420)+"px"; } }
+    const openM=()=>{ build(inp.value===gDom?"":inp.value); setTimeout(()=>inp.select(),0); menu.classList.add("on"); place(); };
+    inp.addEventListener("click",()=>{ if(inp.value&&inp.value===gDom) inp.select(); if(!menu.classList.contains("on")) openM(); });
+    const closeM=()=>{ menu.classList.remove("on"); inp.value=gDom||""; };
+    function choose(l){ gDom=l; inp.value=l; menu.classList.remove("on"); sync(); }
+    inp.addEventListener("focus",openM);
+    inp.addEventListener("input",()=>{ gDom=DP.domains.find(l=>l.toLowerCase()===inp.value.trim().toLowerCase())||null; sync(); build(inp.value); menu.classList.add("on"); place(); });
+    window.addEventListener("resize",()=>{ if(menu.classList.contains("on")) place(); });
+    window.addEventListener("scroll",()=>{ if(menu.classList.contains("on")) place(); },true);
+    inp.addEventListener("keydown",e=>{
+      if(e.key==="ArrowDown"){ e.preventDefault(); if(items.length){ hi=(hi+1)%items.length; ensure(); paint(); } }
+      else if(e.key==="ArrowUp"){ e.preventDefault(); if(items.length){ hi=(hi-1+items.length)%items.length; ensure(); paint(); } }
+      else if(e.key==="Enter"){ e.preventDefault();
+        if(menu.classList.contains("on")&&hi>=0&&items[hi]!=null&&items[hi]!==gDom) choose(items[hi]);
+        else if(menu.classList.contains("on")&&items[hi]===gDom){ menu.classList.remove("on"); if(!$("d-go").disabled) $("d-go").click(); }
+        else if(!$("d-go").disabled) $("d-go").click(); }
+      else if(e.key==="Escape"){ closeM(); inp.blur(); }
+    });
+    document.addEventListener("click",e=>{ if(!e.target.closest("#d-dom-combo")) closeM(); });
+  })();
+  // an era already found stays selected, so the next guess only has to change the domain
+  DP._pickEra=e=>{ gEra=e; [...$("d-era").children].forEach(c=>c.setAttribute("aria-pressed",+c.dataset.e===e?"true":"false")); sync(); };
+}
+function dailyMark(gEra,gLabel){
+  const gi=SEL.findIndex(o=>o.label===gLabel);
+  const era=gEra===DP.era?"ok":gEra>DP.era?"lo":"hi";                    // lo: the answer is earlier; hi: later
+  const dom=gi===DP.field?"ok":(gi>=0&&DFAM(SEL[gi])===DFAM(SEL[DP.field]))?"near":"no";
+  return {era:gEra,dom:gLabel,e:era,d:dom};
+}
+function dailyGuess(gEra,gLabel){
+  DP.guesses.push(dailyMark(gEra,gLabel)); DP._fresh=true;                 // only the newest row moves
+  const last=DP.guesses[DP.guesses.length-1];
+  if(last.e==="ok"&&last.d==="ok"){ DP.done=true; DP.won=true; }
+  else if(DP.guesses.length>=DAILY_MAX) DP.done=true;
+  dailyPersist(); dailyPaint();
+  if(last.e==="ok"&&!DP.done) DP._pickEra(gEra);
+  if(DP.done) dailyReveal();
+}
+function dailyPersist(){
+  if(DP.practice) return;
+  const st=dLoad(); st.cur={n:DP.n,key:DP.key,guesses:DP.guesses,done:DP.done,won:DP.won};
+  if(DP.done&&st.lastScored!==DP.n){                                    // score a finished day exactly once
+    st.played=(st.played||0)+1; st.dist=st.dist||[0,0,0,0,0];
+    if(DP.won){ st.won=(st.won||0)+1; st.dist[DP.guesses.length-1]++; st.streak=(st.lastWon===DP.n-1)?(st.streak||0)+1:1; st.lastWon=DP.n; }
+    else st.streak=0;
+    st.best=Math.max(st.best||0,st.streak||0); st.lastScored=DP.n;
+  }
+  dSave(st);
+}
+function dailyPaint(){
+  const rows=$("d-rows"); rows.innerHTML="";
+  for(let i=0;i<DAILY_MAX;i++){
+    const g=DP.guesses[i];
+    if(!g){ rows.insertAdjacentHTML("beforeend",'<div class="drow blank"><span class="dg"> </span><span class="dg"> </span></div>'); continue; }
+    const eTxt=g.e==="ok"?ERAS[g.era][0]:g.e==="lo"?`${ERAS[g.era][0]} ↑ earlier`:`${ERAS[g.era][0]} ↓ later`;
+    const dTxt=g.dom;                                    // gold alone says "right family"; the key below explains it
+    rows.insertAdjacentHTML("beforeend",`<div class="drow${i===DP.guesses.length-1&&DP._fresh?" arrive":""}"><span class="dg ${g.e==="ok"?"ok":"dir"}">${eTxt}</span><span class="dg ${g.d}">${dTxt}</span></div>`);
+  }
+  DP._fresh=false;
+}
+function dailyTop(){
+  // The country to open on when the answer is revealed. Ancestry tiles are excluded (their hand-estimated
+  // populations put them top of a per-capita map almost every time), and a country needs real output before
+  // its per-capita means anything, so the floor drops only if nothing clears it.
+  const C=compute(), rows=[];
+  for(const g of C.G.keys()){ if(hideDep(g)||GSET.has(g)) continue; const st=statFor(C,g);
+    if(st&&st.n>0&&st.val!=null) rows.push({g,n:st.n,val:st.val}); }
+  for(const floor of [10,3,1]){
+    let best=null,bv=-1;
+    for(const r of rows) if(r.n>=floor&&r.val>bv){ bv=r.val; best=r.g; }
+    if(best) return best;
+  }
+  let best=null,bv=-1;                                 // nothing but ancestry tiles in this cell
+  for(const g of C.G.keys()){ if(hideDep(g)) continue; const st=statFor(C,g); if(st&&st.n>0&&st.val!=null&&st.val>bv){ bv=st.val; best=g; } }
+  return best;
+}
+function dailyReveal(){
+  DAILY_SECRET=false; document.body.classList.remove("secret");
+  S.sel=dailyTop(); render();
+  const end=$("d-end"), k=DP.guesses.length, ans=`${ERAS[DP.era][0]} · ${DP.label}`;
+  const st=dLoad(), share=dailyShare();
+  end.hidden=false; end.classList.add("arrive");
+  end.innerHTML=`<div class="big">${DP.won?`Solved in ${k}/${DAILY_MAX}.`:`Out of guesses.`} It was ${ans}.</div>
+    ${DP.practice?"":`<div id="d-stats">played ${st.played||0} · won ${st.won||0} · streak ${st.streak||0} · best ${st.best||0}</div>`}
+    <div id="d-share">${share}</div>
+    <div class="drow2"><button class="apibtn prim" id="d-x">Post on X</button>
+      <button class="apibtn" id="d-copy">Copy image</button></div>
+    <a class="apibtn" style="text-decoration:none" href="atlas.html#domain=${encodeURIComponent(DP.label)}&era=${encodeURIComponent(ERAS[DP.era][0])}">Open on the Atlas →</a>
+    ${DP.practice?`<a class="apibtn" style="text-decoration:none" href="/daily?practice">Another practice map</a><a class="apibtn" style="text-decoration:none" href="/daily">Today’s puzzle</a>`
+                 :`<div class="dkey" id="d-next"></div><a class="apibtn" style="text-decoration:none" href="/daily?practice">Practice on a random map</a>`}`;
+  $("d-copy").onclick=async()=>{ const k=await dailyToClipboard();
+    $("d-copy").textContent = k==="image" ? "image copied" : k==="text" ? "text copied" : "select the box and copy"; };
+  $("d-x").onclick=async()=>{                                    // copy the card, then open the composer with the text ready
+    const k=await dailyToClipboard();
+    $("d-x").textContent = k==="image" ? "image copied, paste it in" : "opening X";
+    window.open(dailyIntent(), "_blank", "noopener");
+    setTimeout(()=>{ const b=$("d-x"); if(b) b.textContent="Post on X"; }, 6000); };
+  if(!DP.practice){ try{ fetch("/api/daily/finish",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({n:DP.n,k,won:DP.won})}); }catch(e){} }   // how many people finish, signed in or not
+  if(!DP.practice){ end.insertAdjacentHTML("beforeend",'<div class="dboard" id="d-board"><div class="empty">loading the leaderboard…</div></div>'); dailyBoard(); }
+  if(!DP.practice){ const tick=()=>{ const ms=msToEtMidnight(), h=Math.floor(ms/3600000), m=Math.floor(ms%3600000/60000);
+    const el=$("d-next"); if(el) el.textContent=`Next puzzle in ${h}h ${String(m).padStart(2,"0")}m.`; }; tick(); setInterval(tick,30000); }
+}
+function dailyAuth(){
+  const a=$("d-auth"); if(!a) return;
+  if(DP.user){ const u=DP.user;
+    a.innerHTML=`${u.avatar?`<img src="${esc(u.avatar)}" alt="">`:""}<b>@${esc(u.handle)}</b><span>on the leaderboard</span><a class="apibtn" href="#" id="d-out">sign out</a>`;
+    $("d-out").onclick=e=>{ e.preventDefault(); fetch("/auth/logout",{method:"POST"}).then(()=>location.reload()); };
+  } else if(DP.authOn){
+    a.innerHTML=`<span>Sign in to be on the leaderboard.</span><a class="apibtn" href="/auth/x/login?return=%2Fdaily">Sign in with X</a>`;
+  } else a.hidden=true;
+}
+async function dailyBoard(){
+  let b=null;
+  try{
+    if(DP.user){ const r=await fetch("/api/daily/result",{method:"POST",headers:{"Content-Type":"application/json"},
+                   body:JSON.stringify({n:DP.n,guesses:DP.guesses.map(g=>({era:g.era,dom:g.dom}))})});
+                 b=r.ok?(await r.json()).board:null; }
+    if(!b) b=await (await fetch(`/api/daily/board?n=${DP.n}`)).json();
+  }catch{}
+  const box=$("d-board"); if(!box) return;
+  if(!b){ box.innerHTML='<div class="empty">the leaderboard is unavailable right now</div>'; return; }
+  const me=DP.user&&DP.user.handle;
+  const who=r=>`${r.avatar?`<img src="${esc(r.avatar)}" alt="">`:'<span class="dot"></span>'}<a href="https://x.com/${encodeURIComponent(r.handle)}" target="_blank" rel="noopener">@${esc(r.handle)}</a>`;
+  let h=`<div class="lbl">Today · ${b.solved} solved of ${b.played}</div>`;
+  h+=b.today.length?b.today.map((r,i)=>`<div class="row${r.handle===me?" me":""}"><span class="rk">${i+1}</span>${who(r)}<span class="n">${r.won?r.k+"/"+DAILY_MAX:"X/"+DAILY_MAX}</span></div>`).join("")
+                   :'<div class="empty">no one yet today</div>';
+  if(b.streaks.length){ h+='<div class="lbl">Streaks</div>'+b.streaks.slice(0,15).map((r,i)=>`<div class="row${r.handle===me?" me":""}"><span class="rk">${i+1}</span>${who(r)}<span class="n">${r.streak} day${r.streak===1?"":"s"} · ${r.wins} won</span></div>`).join(""); }
+  if(!DP.user&&DP.authOn) h+='<div class="empty" style="margin-top:6px">Sign in with X above and your result joins the board.</div>';
+  box.innerHTML=h;
+  [...box.querySelectorAll(".row")].forEach((r,i)=>{ r.classList.add("arrive"); r.style.animationDelay=(Math.min(i,12)*28)+"ms"; });
+}
+// The shareable card: the guess grid and the score, never the answer. 1200x675 so X shows it uncropped.
+function dailyCard(){
+  const R = 2, w = 1200, h = 675, c = document.createElement("canvas");
+  c.width = w * R; c.height = h * R;
+  const x = c.getContext("2d"); x.scale(R, R);
+  const SERIF = '"Iowan Old Style",Palatino,Georgia,serif', MONO = 'ui-monospace,"SF Mono",Menlo,monospace';
+  const PAPER = "#f7f6f3", SURF = "#fffefc", INK = "#201d16", INK2 = "#57503f", INK3 = "#8b8474",
+        LINE = "#ddd8ca", RULE = "#b9b2a0", GREEN = "#1f8f3f", GOLD = "#c99a1e";
+  x.fillStyle = PAPER; x.fillRect(0, 0, w, h);
+  x.fillStyle = SURF; x.fillRect(30, 30, w - 60, h - 60);
+  x.strokeStyle = LINE; x.lineWidth = 1; x.strokeRect(30.5, 30.5, w - 61, h - 61);
+
+  x.textBaseline = "alphabetic";
+  x.fillStyle = INK; x.font = `600 30px ${SERIF}`;
+  const title = (DP.practice ? "PRACTICE ATLAS" : "DAILY ATLAS · NO. " + DP.n).split("").join("\u2009");
+  x.fillText(title, 72, 108);
+  x.fillStyle = INK3; x.font = `italic 19px ${SERIF}`;
+  x.fillText("Which era and domain is this map?", 72, 140);
+  x.strokeStyle = RULE; x.beginPath(); x.moveTo(72, 160); x.lineTo(w - 72, 160); x.stroke();
+  x.beginPath(); x.moveTo(72, 164); x.lineTo(w - 72, 164); x.stroke();
+
+  // the grid: one row per guess, era square then domain square
+  const n = DP.guesses.length, SQ = 58, GAP = 12, rowH = SQ + GAP;   // five rows must clear the footer rule
+  const gx = 72, gy = 198;
+  DP.guesses.forEach((g, i) => {
+    const y = gy + i * rowH;
+    [[g.e === "ok" ? "ok" : "dir", g.e], [g.d, null]].forEach(([kind, dir], col) => {
+      const px = gx + col * (SQ + GAP);
+      x.fillStyle = kind === "ok" ? GREEN : kind === "near" ? GOLD : SURF;
+      x.fillRect(px, y, SQ, SQ);
+      if (kind !== "ok" && kind !== "near") { x.strokeStyle = RULE; x.lineWidth = 1.5; x.strokeRect(px + .75, y + .75, SQ - 1.5, SQ - 1.5); }
+      if (dir === "lo" || dir === "hi") {                       // the era arrow: earlier or later
+        x.fillStyle = INK2; x.font = `600 30px ${SERIF}`; x.textAlign = "center";
+        x.fillText(dir === "lo" ? "\u2191" : "\u2193", px + SQ / 2, y + SQ / 2 + 11);
+        x.textAlign = "left";
+      }
+    });
+  });
+  for (let i = n; i < DAILY_MAX; i++) {                          // the guesses not needed
+    const y = gy + i * rowH;
+    for (let col = 0; col < 2; col++) {
+      x.strokeStyle = LINE; x.lineWidth = 1.5; x.setLineDash([4, 4]);
+      x.strokeRect(gx + col * (SQ + GAP) + .75, y + .75, SQ - 1.5, SQ - 1.5); x.setLineDash([]);
+    }
+  }
+  x.fillStyle = INK3; x.font = `600 15px ${SERIF}`;
+  x.fillText("ERA", gx + 8, gy - 14); x.fillText("DOMAIN", gx + SQ + GAP + 8, gy - 14);
+
+  // the score beside the grid
+  const rx = gx + 2 * (SQ + GAP) + 74;
+  x.fillStyle = DP.won ? INK : INK3; x.font = `600 128px ${MONO}`;
+  x.fillText(DP.won ? `${n}/${DAILY_MAX}` : `X/${DAILY_MAX}`, rx, gy + 124);
+  x.fillStyle = INK2; x.font = `italic 26px ${SERIF}`;
+  x.fillText(DP.won ? (n === 1 ? "first guess" : "solved in " + n) : "out of guesses", rx + 4, gy + 166);
+  const st = dLoad();
+  if (!DP.practice && st.streak) { x.fillStyle = INK3; x.font = `19px ${SERIF}`;
+    x.fillText(`${st.streak} day streak`, rx + 4, gy + 200); }
+
+  // a legend, so the grid reads to someone meeting it on a timeline
+  const lx = 800, ly = gy + 6, sw = 30;
+  x.fillStyle = INK3; x.font = `600 15px ${SERIF}`; x.fillText("HOW TO READ IT", lx, ly - 18);
+  const leg = [[GREEN, null, "right"], [GOLD, null, "right family"], [SURF, "\u2191", "answer is earlier"], [SURF, "\u2193", "answer is later"]];
+  leg.forEach(([fill, glyph, label], i) => {
+    const y = ly + i * 46;
+    x.fillStyle = fill; x.fillRect(lx, y, sw, sw);
+    if (fill === SURF) { x.strokeStyle = RULE; x.lineWidth = 1.5; x.strokeRect(lx + .75, y + .75, sw - 1.5, sw - 1.5); }
+    if (glyph) { x.fillStyle = INK2; x.font = `600 18px ${SERIF}`; x.textAlign = "center";
+      x.fillText(glyph, lx + sw / 2, y + sw / 2 + 7); x.textAlign = "left"; }
+    x.fillStyle = INK2; x.font = `19px ${SERIF}`; x.fillText(label, lx + sw + 14, y + sw / 2 + 7);
+  });
+  x.fillStyle = INK3; x.font = `italic 18px ${SERIF}`;
+  x.fillText("Five guesses at the era and the domain.", lx, ly + 4 * 46 + 22);
+
+  x.strokeStyle = LINE; x.lineWidth = 1; x.beginPath(); x.moveTo(72, h - 118); x.lineTo(w - 72, h - 118); x.stroke();
+  x.fillStyle = INK; x.font = `600 25px ${SERIF}`; x.fillText("infovore.art/daily", 72, h - 78);
+  x.fillStyle = INK3; x.font = `italic 19px ${SERIF}`;
+  x.fillText("A map of who the quizbowl canon remembers. Made by Stevie Miller.", 72, h - 50);
+  return new Promise(res => c.toBlob(res, "image/png"));
+}
+const dailyIntent = () => "https://x.com/intent/post?text=" + encodeURIComponent(dailyShare().replace("infovore.art/daily", "https://infovore.art/daily"));
+async function dailyToClipboard(){                               // image if the browser allows it, text always
+  try{
+    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": dailyCard() })]);
+      return "image";
+    }
+  }catch(e){}
+  try{ await navigator.clipboard.writeText(dailyShare()); return "text"; }catch(e){}
+  return "";
+}
+function dailyShare(){
+  const rows=DP.guesses.map(g=>`${g.e==="ok"?"🟩":g.e==="lo"?"⬆️":"⬇️"} ${g.d==="ok"?"🟩":g.d==="near"?"🟨":"⬜"}`);
+  return `${DP.practice?"Practice Atlas":"Daily Atlas No. "+DP.n} · ${DP.won?DP.guesses.length:"X"}/${DAILY_MAX}\n${rows.join("\n")}\ninfovore.art/daily`;
+}
+if(DAILY) dailyBoot(); else render();
 
 // --- look under the hood: click a figure -> its verbatim canon mentions -------
 (function(){
