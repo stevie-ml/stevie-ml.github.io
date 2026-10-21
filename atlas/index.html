@@ -280,6 +280,22 @@ body.shot .rankhead{border-top:none;padding-top:0;margin:0}
 body.shot #f-shot{position:fixed;top:14px;right:16px;z-index:60;box-shadow:var(--shadow)}
 body.shot #rankwrap,body.shot .rankhead,body.shot #rankfoot{background:var(--surface)}
 body.shot #rankshell{border:1px solid var(--rule);padding:18px 20px 14px;background:var(--surface);margin-top:26px}
+/* Figures tools: full screen for a screenshot, and the same two card exports the ranking has. */
+#p-figlbl{overflow:hidden}   /* contains the floated tools, so the list starts below them */
+#p-figlbl>span:first-child{display:inline-block;padding-top:7px}
+#p-figlbl .figtools{float:right;display:inline-flex;align-items:center;gap:0;letter-spacing:0;text-transform:none}
+#f-figshot{font:inherit;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--rule);padding:5px 10px;cursor:pointer}
+#f-figshot:hover{color:var(--ink);border-color:var(--ink-3)}
+#f-figshot.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+#figcredit{display:none}
+body.figshot .panel{position:fixed;inset:0;z-index:55;overflow:auto;border:0;padding:34px 48px 40px;min-height:0;background:var(--surface)}
+body.figshot .panel .figs{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px;align-items:start}
+@media(min-width:1750px){body.figshot .panel .figs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+body.figshot .cellhead,body.figshot .metrics{max-width:720px}
+body.figshot .ptabs{display:none !important}
+body.figshot #f-figshot{position:fixed;top:14px;right:16px;z-index:60;box-shadow:var(--shadow)}
+body.figshot #figcredit{display:block;font-size:12px;color:var(--ink-3);font-style:italic;padding:12px 2px 0;text-align:right}
 #f-find{padding:4px 9px;border:1px solid var(--line);border-radius:0;background:var(--surface);color:var(--ink);font-family:var(--serif);font-size:12.5px;min-width:170px;font-style:italic}
 #f-find:focus{outline:2px solid var(--ink);outline-offset:1px}
 table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:8px}
@@ -700,9 +716,10 @@ GROUP BY 1 ORDER BY n DESC LIMIT 10;</pre>
       <button data-t="figs" aria-pressed="true">Figures</button>
       <button data-t="prof" aria-pressed="false">Profile</button>
     </div>
-    <div class="lbl" id="p-figlbl" style="display:none;margin-bottom:6px">Figures, by frequency</div>
+    <div class="lbl" id="p-figlbl" style="display:none;margin-bottom:6px"><span>Figures, by frequency</span><span class="figtools" id="figtools"><button type="button" id="f-figshot" title="The figures alone, full screen, for a screenshot (Esc to leave)">Full screen</button><span class="imgbtns"><button type="button" id="f-figimg" title="Copy this list as a 16:9 PNG, the slot X gives a single image">Copy 16:9</button><button type="button" id="f-figimg2" title="Copy this list as a 7:8 tile, the slot X gives each image in a two-image post">Copy tile</button></span></span></div>
     <div id="p-prof" style="display:none"></div>
     <div class="figs" id="p-figs"></div>
+    <div id="figcredit">Made by Stevie Miller · quizbowl canon via qbreader · infovore.art</div>
   </div>
 </div>
 
@@ -1659,8 +1676,8 @@ function render(){
     // opt-in: a global frequency list across every country, each figure noting its origin.
     const [wa0,wb0]=win();
     $("p-who").textContent="Everyone";
-    $("p-what").textContent=`${curLabel()} · ${S.lo!==null?`born ${wa0}–${wb0}`:ERAS[S.era][0]} · all countries`;
-    $("p-figs").style.display="flex"; $("p-figlbl").style.display="block";
+    $("p-what").textContent=`${curLabel()} · ${S.lo!==null?`alive ${wa0}–${wb0}`:ERAS[S.era][0]} · all countries`;
+    $("p-figs").style.display="flex"; $("p-figlbl").style.display="block"; $("figtools").style.display="none";
     const seenP=new Set(), glob=[];
     for(const [,mem] of C.members) for(const [i,w] of mem){ if(!seenP.has(i)){ seenP.add(i); glob.push([i,w]); } }
     glob.sort((a,b)=>b[1]-a[1]);
@@ -1683,7 +1700,7 @@ function render(){
   }
   $("p-who").innerHTML=NAME(g)+(GSET.has(g)?'<span class="ancmark">people</span>':"");
   const [wa,wb]=win();
-  $("p-what").textContent=`${curLabel()} · ${S.lo!==null?`born ${wa}–${wb}`:ERAS[S.era][0]}`
+  $("p-what").textContent=`${curLabel()} · ${S.lo!==null?`alive ${wa}–${wb}`:ERAS[S.era][0]}`
     + (st.absent?` · no ${NAME(g)} figure in any domain this era`:"");
   const v=$("p-verdict"); v.style.display="inline-block";
   const mv=st.val??st.rca, over=mv>=1.25, under=mv<=0.8, sig=st.z!=null&&Math.abs(st.z)>2;
@@ -1708,7 +1725,7 @@ function render(){
     $("p-prof").style.display="block"; renderProfile(g); return;
   }
   $("p-prof").style.display="none"; $("p-figs").style.display="flex";
-  $("p-figlbl").style.display="block";
+  $("p-figlbl").style.display="block"; $("figtools").style.display="inline-flex";
   const list=(C.members.get(g)||[]).slice().sort((a,b)=>b[1]-a[1]);
   const box=$("p-figs"); box.innerHTML="";
   if(!list.length){ box.innerHTML='<div class="empty-note">No figures match these filters.</div>'; return; }
@@ -1964,11 +1981,11 @@ function wrapLines(x,t,max){ const out=[]; let ln="";
     if(x.measureText(tst).width>max&&ln){out.push(ln);ln=w;} else ln=tst; }
   if(ln) out.push(ln); return out; }
 // title + subtitle at the top of a card; returns the y the body can start at
-function cardHead(x,P,W,pad,s,sub){
+function cardHead(x,P,W,pad,s,sub,ttl){
   const tp=Math.round(s*52), sp=Math.round(s*30);
   let y=pad;
   x.fillStyle=P.INK; x.font=`600 ${tp}px ${P.SERIF}`;
-  for(const ln of wrapLines(x,mapTitleText(),W-pad*2)){ x.fillText(ln,pad,y); y+=Math.round(tp*1.18); }
+  for(const ln of wrapLines(x,ttl===undefined?mapTitleText():ttl,W-pad*2)){ x.fillText(ln,pad,y); y+=Math.round(tp*1.18); }
   y+=Math.round(s*8); x.fillStyle=P.INK3; x.font=`italic ${sp}px ${P.SERIF}`;
   for(const ln of wrapLines(x,sub===undefined?mapSubTitle():sub,W-pad*2)){ x.fillText(ln,pad,y); y+=Math.round(sp*1.32); }
   return y;
@@ -2105,6 +2122,54 @@ function rankCard(W,H){
 }
 
 
+// The figures list as an image: the country's most-asked people in the selected domain and era, the
+// same card the ranking exports, so a map / ranking / figures set reads as one post (Stevie, Oct 21 2026).
+function figEraText(){ const [wa,wb]=win(); return S.lo!==null?`alive ${wa}–${wb}`:ERAS[S.era][0]; }
+function figTitleText(){ const dom=POOLED_ALL?"all domains":curLabel(); return `${NAME(S.sel)}: most-asked figures in ${dom}, ${figEraText()}`; }
+function figSubTitle(st){
+  const v=$("p-verdict").textContent.trim(), pop=$("m-pop").textContent.trim();
+  return `${st.n} figures, weight ${st.obs>=10?st.obs.toFixed(0):st.obs.toFixed(1)}`+(v?`; ${v}`:"")+(pop&&pop!=="—"?`; population ${pop}`:"");
+}
+function fitText(x,t,max){ if(x.measureText(t).width<=max) return t; let s=t; while(s.length>1&&x.measureText(s+"…").width>max) s=s.slice(0,-1); return s+"…"; }
+function figCard(W,H){
+  const g=S.sel; if(!g) throw new Error("select a country first");
+  const C=compute(), st=statFor(C,g); if(!st) throw new Error("no figures");
+  const list=(C.members.get(g)||[]).slice().sort((a,b)=>b[1]-a[1]);
+  const s=W/2400, pad=Math.round(72*s);
+  const {c,x,P:K}=cardBase(W,H);                         // K: the palette (P is the people array)
+  let y=cardHead(x,K,W,pad,s,figSubTitle(st),figTitleText())+Math.round(s*26);
+  const hp=Math.round(s*26);
+  x.font=`600 ${hp}px ${K.SERIF}`; x.fillStyle=K.INK3; x.fillText("FIGURE",pad,y);
+  x.textAlign="right"; x.fillText("WEIGHT",W-pad,y); x.textAlign="left";
+  y+=Math.round(s*42);
+  x.strokeStyle=K.RULE; x.lineWidth=Math.max(1,Math.round(1.5*s));
+  x.beginPath(); x.moveTo(pad,y); x.lineTo(W-pad,y); x.stroke(); y+=Math.round(s*20);
+  const footY=H-pad-Math.round(s*80), avail=footY-y;
+  const ROWS=H>W?14:10, take=Math.min(ROWS,list.length);      // a tall tile carries more rows than the 16:9 card
+  const rowH=Math.min(Math.round(s*150),Math.floor(avail/Math.max(1,take)));
+  const np=Math.min(Math.round(s*50),Math.floor((rowH-s*22)/1.62)), mp=Math.round(np*0.62), nx=pad+Math.round(s*78);   // name + meta + rule fit inside the pitch
+  y+=Math.max(0,Math.floor((avail-rowH*take)/2));
+  let rk=0;
+  for(const [i,w] of list.slice(0,take)){
+    rk++; const p=P[i];
+    const yrs=(p[4]!=null?String(p[4]):"")+(p[15]===-1?"–":(p[15]==null?"":"–"+p[15]));
+    const pol=String(p[10]||"").trim();
+    const meta=[yrs,p[6]||"",pol||NAME(p[1])||""].filter(Boolean).join(" · ");
+    x.textAlign="right"; x.fillStyle=K.INK; x.font=`600 ${np}px ${K.SERIF}`;
+    const wt=String(Math.round(w)), ww=x.measureText(wt).width; x.fillText(wt,W-pad,y); x.textAlign="left";
+    x.fillStyle=K.INK3; x.font=`700 ${Math.round(np*0.52)}px ${K.SERIF}`; x.fillText("#"+rk,pad,y+Math.round(np*0.3));
+    x.fillStyle=K.INK; x.font=`600 ${np}px ${K.SERIF}`; x.fillText(fitText(x,p[0],W-pad-nx-ww-Math.round(s*40)),nx,y);
+    x.fillStyle=K.INK3; x.font=`${mp}px ${K.SERIF}`; x.fillText(fitText(x,meta,W-pad*2-nx),nx,y+np+Math.round(s*8));
+    const ly=y+rowH-Math.round(s*16);
+    x.strokeStyle=K.LINE; x.lineWidth=1; x.beginPath(); x.moveTo(pad,ly); x.lineTo(W-pad,ly); x.stroke();
+    y+=rowH;
+  }
+  const note=`Top ${take} of ${list.length} figures; weight = questions answered by them ×2 + mentions, later clues weigh more`;
+  x.fillStyle=K.INK3; x.font=`${Math.round(s*26)}px ${K.SERIF}`; x.fillText(fitText(x,note,W-pad*2),pad,footY+Math.round(s*6));
+  cardFoot(x,K,W,H,pad,s,false);
+  return new Promise(r=>c.toBlob(r,"image/png"));
+}
+
 // one copy path for every card button: render, put a PNG on the clipboard, fall back to a download
 function wireCopy(id,make,dims){
   const btn=$(id); if(!btn) return;
@@ -2117,7 +2182,7 @@ function wireCopy(id,make,dims){
         btn.textContent="copied";
       }else{
         const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-        a.download=id.includes("rank")?"atlas-ranking.png":"atlas-map.png"; a.click(); URL.revokeObjectURL(a.href);
+        a.download=id.includes("rank")?"atlas-ranking.png":id.includes("fig")?"atlas-figures.png":"atlas-map.png"; a.click(); URL.revokeObjectURL(a.href);
         btn.textContent="downloaded";
       }
     }catch(e){ btn.textContent="failed"; console.error(e); }
@@ -2128,6 +2193,13 @@ wireCopy("f-mapimg",  mapCard,  CARD.wide);
 wireCopy("f-mapimg2", mapCard,  CARD.tile);
 wireCopy("f-rankimg", rankCard, CARD.wide);
 wireCopy("f-rankimg2",rankCard, CARD.tile);
+wireCopy("f-figimg",  figCard,  CARD.wide);
+wireCopy("f-figimg2", figCard,  CARD.tile);
+$("f-figshot").onclick=()=>{ const on=!document.body.classList.contains("figshot");
+  document.body.classList.toggle("figshot",on); $("f-figshot").classList.toggle("on",on);
+  $("f-figshot").textContent=on?"Exit full screen":"Full screen";
+  if(on) $("p-who").scrollIntoView({block:"start"}); };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.body.classList.contains("figshot")) $("f-figshot").click(); });
 $("f-shot").onclick=()=>{ const on=!document.body.classList.contains("shot");
   document.body.classList.toggle("shot",on); $("f-shot").classList.toggle("on",on);
   $("f-shot").textContent=on?"Exit screenshot view":"Screenshot view";
