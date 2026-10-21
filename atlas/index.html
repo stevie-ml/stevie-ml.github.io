@@ -1139,7 +1139,10 @@ function compute(){
     for(const [fi,n] of fl){
       const isSel=FIX.has(fi)||(theo&&fi===HISTI);
       const lens = (isSel && S.lens) ? "alt" : "default";
-      const w=memberW(i,fi,n,lens);
+      // Everything pooled asks who the canon asks about, full stop: every role counts there. Within a
+      // domain a poem's subject is not a poet, but pooled, dropping subject weight hid exactly the people
+      // who get painted and written about (Washington 749 showed 411 and ranked #26 in the US; Oct 21 2026).
+      const w=(POOLED_ALL&&!p[19])?n:memberW(i,fi,n,lens);
       if(w<=0) continue;
       if(isSel) selW+=w;
       for(const g of gs){
@@ -1771,7 +1774,7 @@ function figEl(i,w,rank,withCountry){
   let _pract=false, _seen=false;
   for(const fi of _selix){ const rv=_rmk[fi]||_rmk[String(fi)]; if(rv){ _seen=true; if(rv==="p") _pract=true; } }
   if(p[22]!=null && _selix.has(p[22]) && (_rmk[p[22]]||_rmk[String(p[22])])==="p") _pract=true;
-  if(_seen && !_pract) bits.push("subject");   // practitioner is the default and adds nothing
+  if(_seen && !_pract && !POOLED_ALL) bits.push("subject");   // practitioner is the default and adds nothing; pooled counts every role
   // every other field a practitioner works in is listed formally, even when the descriptor already implies it (Stevie)
   const others=POOLED_ALL?[]:(p[9]||[]).filter(fi=>fi!==_k0).map(fi=>disp(F[fi]));
   if(others.length) bits.push('<span class="alsofld" title="this person also works in these fields">also '+others.join(", ")+'</span>');
