@@ -1914,10 +1914,12 @@ seg("f-anc","anc","a");
 function clearCustom(){S.lo=S.hi=null;$("f-lo").value="";$("f-hi").value="";}
 $("f-apply").onclick=()=>{
   let a=parseInt($("f-lo").value,10), b=parseInt($("f-hi").value,10);
-  if(isNaN(a)&&isNaN(b)) return;              // both blank: nothing to apply
+  if(isNaN(a)&&isNaN(b)){                     // both blank = all eras: clear the custom window (it used to do nothing, and the next
+    clearCustom(); S.era=0; render(); return; }  // render refilled the boxes from S.lo/S.hi, so the window could not be cleared; Oct 21 2026)
   if(isNaN(a)) a=-9999;                       // blank start: all the way into the deep past
   if(isNaN(b)) b=NOW;                          // blank end: up to the present
   if(b<a) return;
+  if(a<=-9999&&b>=NOW){ clearCustom(); S.era=0; render(); return; }   // one box blanked, the other at its edge: that is all eras too
   S.lo=a;S.hi=b;[...es.children].forEach(c=>c.setAttribute("aria-pressed","false"));render();
 };
 $("f-lo").addEventListener("keydown",e=>{if(e.key==="Enter")$("f-apply").click();});
