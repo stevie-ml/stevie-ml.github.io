@@ -2138,32 +2138,37 @@ function figCard(W,H){
   const s=W/2400, pad=Math.round(72*s);
   const {c,x,P:K}=cardBase(W,H);                         // K: the palette (P is the people array)
   let y=cardHead(x,K,W,pad,s,figSubTitle(st),figTitleText())+Math.round(s*26);
+  // Two columns, ranks running down the left then the right: 28 figures on the tall tile, 20 on the wide
+  // card (Stevie, Oct 21 2026). The rank numbers carry the map's accent colour, as they do on the page.
+  const ACC=getComputedStyle(document.body).getPropertyValue("--map-sel").trim()||K.INK;
+  const NCOL=2, gap=Math.round(s*70), colW=Math.floor((W-pad*2-gap)/NCOL);
   const hp=Math.round(s*26);
-  x.font=`600 ${hp}px ${K.SERIF}`; x.fillStyle=K.INK3; x.fillText("FIGURE",pad,y);
-  x.textAlign="right"; x.fillText("WEIGHT",W-pad,y); x.textAlign="left";
+  x.font=`600 ${hp}px ${K.SERIF}`; x.fillStyle=K.INK3;
+  for(let c=0;c<NCOL;c++){ const x0=pad+c*(colW+gap);
+    x.textAlign="left"; x.fillText("FIGURE",x0,y); x.textAlign="right"; x.fillText("WEIGHT",x0+colW,y); }
+  x.textAlign="left";
   y+=Math.round(s*42);
   x.strokeStyle=K.RULE; x.lineWidth=Math.max(1,Math.round(1.5*s));
-  x.beginPath(); x.moveTo(pad,y); x.lineTo(W-pad,y); x.stroke(); y+=Math.round(s*20);
+  for(let c=0;c<NCOL;c++){ const x0=pad+c*(colW+gap); x.beginPath(); x.moveTo(x0,y); x.lineTo(x0+colW,y); x.stroke(); }
+  y+=Math.round(s*20);
   const footY=H-pad-Math.round(s*80), avail=footY-y;
-  const ROWS=H>W?14:10, take=Math.min(ROWS,list.length);      // a tall tile carries more rows than the 16:9 card
-  const rowH=Math.min(Math.round(s*150),Math.floor(avail/Math.max(1,take)));
-  const np=Math.min(Math.round(s*50),Math.floor((rowH-s*22)/1.62)), mp=Math.round(np*0.62), nx=pad+Math.round(s*78);   // name + meta + rule fit inside the pitch
-  y+=Math.max(0,Math.floor((avail-rowH*take)/2));
-  let rk=0;
-  for(const [i,w] of list.slice(0,take)){
-    rk++; const p=P[i];
+  const PER=H>W?14:10, take=Math.min(PER*NCOL,list.length), rows=Math.min(PER,take);   // rows in the fuller (left) column
+  const rowH=Math.min(Math.round(s*150),Math.floor(avail/Math.max(1,rows)));
+  const np=Math.min(Math.round(s*46),Math.floor((rowH-s*30)/1.62)), mp=Math.round(np*0.62), rkw=Math.round(s*84);   // name + meta + a clear gap above the rule
+  const y0=y+Math.max(0,Math.floor((avail-rowH*rows)/2));
+  list.slice(0,take).forEach(([i,w],k)=>{
+    const p=P[i], c=Math.floor(k/PER), r=k%PER, x0=pad+c*(colW+gap), xr=x0+colW, nx=x0+rkw, yy=y0+r*rowH;
     const yrs=(p[4]!=null?String(p[4]):"")+(p[15]===-1?"–":(p[15]==null?"":"–"+p[15]));
     const pol=String(p[10]||"").trim();
     const meta=[yrs,p[6]||"",pol||NAME(p[1])||""].filter(Boolean).join(" · ");
     x.textAlign="right"; x.fillStyle=K.INK; x.font=`600 ${np}px ${K.SERIF}`;
-    const wt=String(Math.round(w)), ww=x.measureText(wt).width; x.fillText(wt,W-pad,y); x.textAlign="left";
-    x.fillStyle=K.INK3; x.font=`700 ${Math.round(np*0.52)}px ${K.SERIF}`; x.fillText("#"+rk,pad,y+Math.round(np*0.3));
-    x.fillStyle=K.INK; x.font=`600 ${np}px ${K.SERIF}`; x.fillText(fitText(x,p[0],W-pad-nx-ww-Math.round(s*40)),nx,y);
-    x.fillStyle=K.INK3; x.font=`${mp}px ${K.SERIF}`; x.fillText(fitText(x,meta,W-pad*2-nx),nx,y+np+Math.round(s*8));
-    const ly=y+rowH-Math.round(s*16);
-    x.strokeStyle=K.LINE; x.lineWidth=1; x.beginPath(); x.moveTo(pad,ly); x.lineTo(W-pad,ly); x.stroke();
-    y+=rowH;
-  }
+    const wt=String(Math.round(w)), ww=x.measureText(wt).width; x.fillText(wt,xr,yy); x.textAlign="left";
+    x.fillStyle=ACC; x.font=`700 ${Math.round(np*0.56)}px ${K.SERIF}`; x.fillText("#"+(k+1),x0,yy+Math.round(np*0.28));
+    x.fillStyle=K.INK; x.font=`600 ${np}px ${K.SERIF}`; x.fillText(fitText(x,p[0],xr-nx-ww-Math.round(s*30)),nx,yy);
+    x.fillStyle=K.INK3; x.font=`${mp}px ${K.SERIF}`; x.fillText(fitText(x,meta,xr-nx),nx,yy+np+Math.round(s*8));
+    const ly=yy+Math.max(rowH-Math.round(s*16),np+mp+Math.round(s*16));   // never let the meta line sit on the rule (wide card)
+    x.strokeStyle=K.LINE; x.lineWidth=1; x.beginPath(); x.moveTo(x0,ly); x.lineTo(xr,ly); x.stroke();
+  });
   const note=`Top ${take} of ${list.length} figures; weight = questions answered by them ×2 + mentions, later clues weigh more`;
   x.fillStyle=K.INK3; x.font=`${Math.round(s*26)}px ${K.SERIF}`; x.fillText(fitText(x,note,W-pad*2),pad,footY+Math.round(s*6));
   cardFoot(x,K,W,H,pad,s,false);
