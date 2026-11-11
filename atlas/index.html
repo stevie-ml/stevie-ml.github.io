@@ -1680,7 +1680,7 @@ function render(){
     const [wa0,wb0]=win();
     $("p-who").textContent="Everyone";
     $("p-what").textContent=`${curLabel()} · ${S.lo!==null?`alive ${wa0}–${wb0}`:ERAS[S.era][0]} · all countries`;
-    $("p-figs").style.display="flex"; $("p-figlbl").style.display="block"; $("figtools").style.display="none";
+    $("p-figs").style.display="flex"; $("p-figlbl").style.display="block"; $("figtools").style.display="inline-flex";
     const seenP=new Set(), glob=[];
     for(const [,mem] of C.members) for(const [i,w] of mem){ if(!seenP.has(i)){ seenP.add(i); glob.push([i,w]); } }
     glob.sort((a,b)=>b[1]-a[1]);
@@ -2129,20 +2129,24 @@ function rankCard(W,H){
 
 // The figures list as an image: the country's most-asked people in the selected domain and era, the
 // same card the ranking exports, so a map / ranking / figures set reads as one post (Stevie, Oct 21 2026).
-function figEraText(){ const [wa,wb]=win(); return S.lo!==null?`alive ${wa}–${wb}`:ERAS[S.era][0]; }
-function figTitleText(){ const dom=POOLED_ALL?"all domains":curLabel(); return `${NAME(S.sel)}: most-asked figures in ${dom}, ${figEraText()}`; }
+function figEraText(){ const [wa,wb]=win(); return S.lo!==null?`alive ${wa}–${wb}`:(ERAS[S.era][0]==="All"?"all eras":ERAS[S.era][0]); }
+function figTitleText(){ const dom=POOLED_ALL?"all domains":curLabel(); return `${S.sel?NAME(S.sel):"Everyone"}: most-asked figures in ${dom}, ${figEraText()}`; }
+// the global list ("Everyone", Advanced > global figure list): one entry per person across every country
+function globalFigList(C){ const seen=new Set(), out=[]; for(const [,mem] of C.members) for(const [i,w] of mem){ if(!seen.has(i)){ seen.add(i); out.push([i,w]); } } return out.sort((a,b)=>b[1]-a[1]); }
 function figSubTitle(st){
   const v=$("p-verdict").textContent.trim(), pop=$("m-pop").textContent.trim();
   return `${st.n} figures, weight ${st.obs>=10?st.obs.toFixed(0):st.obs.toFixed(1)}`+(v?`; ${v}`:"")+(pop&&pop!=="—"?`; population ${pop}`:"");
 }
 function fitText(x,t,max){ if(x.measureText(t).width<=max) return t; let s=t; while(s.length>1&&x.measureText(s+"…").width>max) s=s.slice(0,-1); return s+"…"; }
 function figCard(W,H){
-  const g=S.sel; if(!g) throw new Error("select a country first");
-  const C=compute(), st=statFor(C,g); if(!st) throw new Error("no figures");
-  const list=(C.members.get(g)||[]).slice().sort((a,b)=>b[1]-a[1]);
+  const g=S.sel, C=compute(); let list, sub;
+  if(g){ const st=statFor(C,g); if(!st) throw new Error("no figures");
+    list=(C.members.get(g)||[]).slice().sort((a,b)=>b[1]-a[1]); sub=figSubTitle(st); }
+  else if(S.globallist){ list=globalFigList(C); sub=`${list.length.toLocaleString()} figures across all countries, ranked by weight`; }
+  else throw new Error("select a country first");
   const s=W/2400, pad=Math.round(72*s);
   const {c,x,P:K}=cardBase(W,H);                         // K: the palette (P is the people array)
-  let y=cardHead(x,K,W,pad,s,figSubTitle(st),figTitleText())+Math.round(s*26);
+  let y=cardHead(x,K,W,pad,s,sub,figTitleText())+Math.round(s*26);
   // Two columns, ranks running down the left then the right: 28 figures on the tall tile, 20 on the wide
   // card (Stevie, Oct 21 2026). The rank numbers carry the map's accent colour, as they do on the page.
   const ACC=getComputedStyle(document.body).getPropertyValue("--map-sel").trim()||K.INK;
@@ -2165,7 +2169,7 @@ function figCard(W,H){
     const p=P[i], c=Math.floor(k/PER), r=k%PER, x0=pad+c*(colW+gap), xr=x0+colW, nx=x0+rkw, yy=y0+r*rowH;
     const yrs=(p[4]!=null?String(p[4]):"")+(p[15]===-1?"–":(p[15]==null?"":"–"+p[15]));
     const pol=String(p[10]||"").trim();
-    const meta=[yrs,p[6]||"",pol||NAME(p[1])||""].filter(Boolean).join(" · ");
+    const meta=[yrs,p[6]||"",g?(pol||NAME(p[1])||""):(NAME(p[1])||"")].filter(Boolean).join(" · ");   // the global card names the country, not the polity
     x.textAlign="right"; x.fillStyle=K.INK; x.font=`600 ${np}px ${K.SERIF}`;
     const wt=String(Math.round(w)), ww=x.measureText(wt).width; x.fillText(wt,xr,yy); x.textAlign="left";
     x.fillStyle=ACC; x.font=`700 ${Math.round(np*0.56)}px ${K.SERIF}`; x.fillText("#"+(k+1),x0,yy+Math.round(np*0.28));
