@@ -948,7 +948,14 @@ const FAM_SCREEN=new Set(F.map((f,i)=>(f==="Movies"||f==="Other Fine Arts / Film
 const P_LIT=P_DISC.map(d=>[...d].some(i=>FAM_LIT.has(i)));
 const P_SCREEN=P_DISC.map(d=>[...d].some(i=>FAM_SCREEN.has(i)));
 const FAM_STAGE=new Set(F.map((f,i)=>(f==="Other Fine Arts / Opera"||f==="Musicals"||f==="Other Fine Arts / Dance"||f==="Auditory Fine Arts")?i:-1).filter(i=>i>=0));   // composers, librettists, choreographers
-const P_STAGE=P_DISC.map(d=>[...d].some(i=>FAM_STAGE.has(i)));
+// A performer counts in Auditory Fine Arts whatever their finer discipline. Quizbowl files jazz and
+// non-Western music (Fairuz, Umm Kulthum) under the Auditory Fine Arts subcategory but the pipeline
+// tags their discipline Jazz or Music, so the old stage-only test dropped the biggest AFA figures from
+// the AFA list: Miles Davis (398), Coltrane (345), Armstrong, Ellington, Parker all showed in NO music
+// domain. The discipline must be a music field, so musical subjects (Jesus, Napoleon, operas' namesakes)
+// still stay out. (Stevie, Nov 21 2026)
+const MUS_DISC=new Set(F.map((f,i)=>(FAM_STAGE.has(i)||f==="Music"||f==="Other Fine Arts / Jazz")?i:-1).filter(i=>i>=0));
+const P_STAGE=P_DISC.map(d=>[...d].some(i=>MUS_DISC.has(i)));
 function narrPr(i,fi){ return FAM_LIT.has(fi) ? P_LIT[i] : (FAM_SCREEN.has(fi) ? P_SCREEN[i] : (FAM_STAGE.has(fi) ? P_STAGE[i] : P_DISC[i].has(fi))); }
 // folk/legendary real people who ALSO belong in Mythology (curated; Wikidata tags them only "human").
 // They keep their real field AND appear in Mythology. (Mirrors folk_myth.json.)
